@@ -78,24 +78,132 @@
 
             <!-- Navigation Tabs Comprador -->
             <nav class="flex justify-center mb-8">
-                <div class="bg-white rounded-lg shadow-md p-1">
-                    <button onclick="showCompradorTab('produtos')" id="tab-comprador-produtos" class="px-6 py-3 rounded-md font-medium transition-all bg-blue-600 text-white">
-                        📦 Meus Produtos
+                <div class="bg-white rounded-lg shadow-md p-1 flex flex-wrap">
+                    <button onclick="showCompradorTab('cotacoes-semanais')" id="tab-comprador-cotacoes-semanais" class="px-4 py-3 rounded-md font-medium transition-all bg-blue-600 text-white text-sm">
+                        📅 Cotações Semanais
                     </button>
-                    <button onclick="showCompradorTab('cotacoes-recebidas')" id="tab-comprador-cotacoes-recebidas" class="px-6 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600">
+                    <button onclick="showCompradorTab('produtos')" id="tab-comprador-produtos" class="px-4 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600 text-sm">
+                        📦 Produtos Individuais
+                    </button>
+                    <button onclick="showCompradorTab('cotacoes-recebidas')" id="tab-comprador-cotacoes-recebidas" class="px-4 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600 text-sm">
                         📨 Cotações Recebidas
                     </button>
-                    <button onclick="showCompradorTab('analise')" id="tab-comprador-analise" class="px-6 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600">
+                    <button onclick="showCompradorTab('analise')" id="tab-comprador-analise" class="px-4 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600 text-sm">
                         📊 Análise Inteligente
                     </button>
-                    <button onclick="showCompradorTab('backup')" id="tab-comprador-backup" class="px-6 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600">
+                    <button onclick="showCompradorTab('backup')" id="tab-comprador-backup" class="px-4 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600 text-sm">
                         💾 Backup
                     </button>
                 </div>
             </nav>
 
+            <!-- Cotações Semanais Tab -->
+            <div id="comprador-cotacoes-semanais-tab" class="tab-content-comprador">
+                <!-- Status da Cotação Atual -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl shadow-lg p-6 mb-6 border-2 border-blue-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-blue-800">📅 Cotação Semanal</h2>
+                            <p class="text-blue-600" id="periodo-atual">Carregando período...</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div id="status-cotacao" class="px-4 py-2 rounded-full text-sm font-bold">
+                                <!-- Status será inserido aqui -->
+                            </div>
+                            <button onclick="toggleCotacao()" id="btn-toggle-cotacao" class="px-6 py-3 rounded-lg font-medium transition-colors">
+                                <!-- Botão será inserido aqui -->
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-lg p-4 text-center">
+                            <p class="text-2xl font-bold text-blue-600" id="total-produtos-semana">0</p>
+                            <p class="text-sm text-gray-600">Produtos na Lista</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 text-center">
+                            <p class="text-2xl font-bold text-green-600" id="total-cotacoes-semana">0</p>
+                            <p class="text-sm text-gray-600">Cotações Recebidas</p>
+                        </div>
+                        <div class="bg-white rounded-lg p-4 text-center">
+                            <p class="text-2xl font-bold text-purple-600" id="total-fornecedores-semana">0</p>
+                            <p class="text-sm text-gray-600">Fornecedores Participando</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Importar Lista de Produtos -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">📋 Importar Lista de Produtos</h3>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Upload de Arquivo -->
+                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                            <h4 class="font-bold text-blue-800 mb-3">📁 Upload de Arquivo</h4>
+                            <p class="text-blue-700 text-sm mb-3">Formatos aceitos: CSV, TXT (separado por vírgula ou ponto e vírgula)</p>
+                            <input type="file" id="arquivo-produtos" accept=".csv,.txt" class="w-full mb-3 text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <button onclick="importarArquivoProdutos()" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                                📤 Importar Arquivo
+                            </button>
+                        </div>
+
+                        <!-- Entrada Manual -->
+                        <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                            <h4 class="font-bold text-green-800 mb-3">✏️ Entrada Manual</h4>
+                            <p class="text-green-700 text-sm mb-3">Cole sua lista aqui (um produto por linha)</p>
+                            <textarea id="lista-manual" placeholder="Produto A, 10, R$ 15.50&#10;Produto B, 5, R$ 25.00&#10;Produto C, 20" class="w-full h-20 px-3 py-2 border border-green-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"></textarea>
+                            <button onclick="importarListaManual()" class="w-full mt-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors font-medium">
+                                ✅ Processar Lista
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Exemplo de Formato -->
+                    <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <h5 class="font-bold text-gray-800 mb-2">💡 Formato Esperado:</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p class="font-medium text-gray-700 mb-1">Com preço de referência:</p>
+                                <code class="bg-white p-2 rounded border text-xs block">Produto A, 10, R$ 15.50<br>Produto B, 5, R$ 25.00</code>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-700 mb-1">Apenas nome e quantidade:</p>
+                                <code class="bg-white p-2 rounded border text-xs block">Produto A, 10<br>Produto B, 5</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de Produtos da Semana -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">📦 Produtos desta Semana</h3>
+                        <div class="flex gap-2">
+                            <button onclick="adicionarProdutoManual()" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors font-medium text-sm">
+                                ➕ Adicionar Produto
+                            </button>
+                            <button onclick="limparListaSemana()" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors font-medium text-sm">
+                                🗑️ Limpar Lista
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="produtos-semana-lista">
+                        <div class="text-center py-8 text-gray-500">Nenhum produto adicionado ainda</div>
+                    </div>
+                </div>
+
+                <!-- Histórico de Cotações -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">📚 Histórico de Cotações Semanais</h3>
+                    <div id="historico-cotacoes-semanais">
+                        <div class="text-center py-8 text-gray-500">Nenhuma cotação semanal finalizada ainda</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Produtos Tab Comprador -->
-            <div id="comprador-produtos-tab" class="tab-content-comprador">
+            <div id="comprador-produtos-tab" class="tab-content-comprador hidden">
                 <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                     <h2 class="text-2xl font-bold text-gray-800 mb-4">Criar Solicitação de Cotação</h2>
                     <form onsubmit="criarSolicitacao(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -251,11 +359,24 @@
                 </form>
             </div>
 
-            <!-- Solicitações Disponíveis -->
+            <!-- Cotação Semanal Ativa -->
+            <div id="cotacao-semanal-fornecedor" class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">📅 Cotação Semanal Ativa</h2>
+                    <div id="status-cotacao-fornecedor" class="px-4 py-2 rounded-full text-sm font-bold">
+                        <!-- Status será inserido aqui -->
+                    </div>
+                </div>
+                <div id="produtos-cotacao-semanal">
+                    <div class="text-center py-8 text-gray-500">Nenhuma cotação semanal ativa no momento</div>
+                </div>
+            </div>
+
+            <!-- Solicitações Individuais -->
             <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Solicitações de Cotação Disponíveis</h2>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Solicitações Individuais Disponíveis</h2>
                 <div id="solicitacoes-disponiveis">
-                    <div class="text-center py-8 text-gray-500">Nenhuma solicitação disponível no momento</div>
+                    <div class="text-center py-8 text-gray-500">Nenhuma solicitação individual disponível no momento</div>
                 </div>
             </div>
 
@@ -377,6 +498,8 @@
         let tipoUsuario = null;
         let solicitacoes = [];
         let cotacoes = [];
+        let cotacoesSemanais = [];
+        let cotacaoAtual = null;
         let fornecedorAtual = {
             nome: 'Fornecedor Exemplo',
             prazoEntrega: 7
@@ -386,12 +509,16 @@
         function carregarDadosSalvos() {
             solicitacoes = BancoDados.carregar('solicitacoes', []);
             cotacoes = BancoDados.carregar('cotacoes', []);
+            cotacoesSemanais = BancoDados.carregar('cotacoesSemanais', []);
+            cotacaoAtual = BancoDados.carregar('cotacaoAtual', null);
             
             const fornecedorSalvo = BancoDados.carregar('fornecedorAtual', null);
             if (fornecedorSalvo) {
                 fornecedorAtual = fornecedorSalvo;
             }
             
+            // Verificar se há cotação ativa e se já expirou
+            verificarCotacaoAtiva();
             atualizarEstatisticas();
         }
 
@@ -458,6 +585,7 @@
                 
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('comprador-interface').classList.remove('hidden');
+                showCompradorTab('cotacoes-semanais');
                 atualizarInterfaceComprador();
                 atualizarEstatisticas();
                 
@@ -496,6 +624,8 @@
             
             if (tabName === 'backup') {
                 atualizarEstatisticas();
+            } else if (tabName === 'cotacoes-semanais') {
+                atualizarInterfaceCotacaoSemanal();
             }
         }
 
@@ -673,10 +803,14 @@
         let produtosSelecionados = [];
 
         function atualizarInterfaceFornecedor() {
+            // Atualizar cotação semanal
+            atualizarCotacaoSemanalFornecedor();
+            
+            // Atualizar solicitações individuais
             const container = document.getElementById('solicitacoes-disponiveis');
             
             if (solicitacoes.length === 0) {
-                container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhuma solicitação disponível no momento</div>';
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhuma solicitação individual disponível no momento</div>';
                 document.getElementById('formulario-cotacao').classList.add('hidden');
                 return;
             }
@@ -1198,6 +1332,600 @@
             }
         }
 
+        // ===== SISTEMA DE COTAÇÕES SEMANAIS =====
+        
+        function verificarCotacaoAtiva() {
+            if (cotacaoAtual && cotacaoAtual.status === 'ativa') {
+                const agora = new Date();
+                const dataFim = new Date(cotacaoAtual.dataFim);
+                
+                if (agora > dataFim) {
+                    // Cotação expirou automaticamente
+                    finalizarCotacaoAutomatica();
+                }
+            }
+        }
+        
+        function criarNovaCotacao() {
+            const agora = new Date();
+            const dataFim = new Date(agora);
+            dataFim.setDate(dataFim.getDate() + 7); // 7 dias para cotação
+            
+            cotacaoAtual = {
+                id: Date.now(),
+                semana: obterSemanaAtual(),
+                dataInicio: agora.toISOString(),
+                dataFim: dataFim.toISOString(),
+                status: 'ativa',
+                produtos: [],
+                cotacoes: []
+            };
+            
+            BancoDados.salvar('cotacaoAtual', cotacaoAtual);
+            atualizarInterfaceCotacaoSemanal();
+            atualizarInterfaceFornecedor();
+            
+            mostrarNotificacao('Nova cotação semanal iniciada! Válida por 7 dias.', 'success');
+        }
+        
+        function toggleCotacao() {
+            if (!cotacaoAtual || cotacaoAtual.status === 'finalizada') {
+                criarNovaCotacao();
+            } else {
+                finalizarCotacao();
+            }
+        }
+        
+        function finalizarCotacao() {
+            if (!cotacaoAtual) return;
+            
+            cotacaoAtual.status = 'finalizada';
+            cotacaoAtual.dataFinalizacao = new Date().toISOString();
+            
+            // Mover para histórico
+            cotacoesSemanais.push({...cotacaoAtual});
+            BancoDados.salvar('cotacoesSemanais', cotacoesSemanais);
+            
+            // Limpar cotação atual
+            cotacaoAtual = null;
+            BancoDados.salvar('cotacaoAtual', cotacaoAtual);
+            
+            atualizarInterfaceCotacaoSemanal();
+            atualizarInterfaceFornecedor();
+            
+            mostrarNotificacao('Cotação finalizada e movida para o histórico!', 'info');
+        }
+        
+        function finalizarCotacaoAutomatica() {
+            if (!cotacaoAtual) return;
+            
+            cotacaoAtual.status = 'expirada';
+            cotacaoAtual.dataFinalizacao = new Date().toISOString();
+            
+            // Mover para histórico
+            cotacoesSemanais.push({...cotacaoAtual});
+            BancoDados.salvar('cotacoesSemanais', cotacoesSemanais);
+            
+            // Limpar cotação atual
+            cotacaoAtual = null;
+            BancoDados.salvar('cotacaoAtual', cotacaoAtual);
+            
+            atualizarInterfaceCotacaoSemanal();
+            atualizarInterfaceFornecedor();
+        }
+        
+        function obterSemanaAtual() {
+            const agora = new Date();
+            const inicioAno = new Date(agora.getFullYear(), 0, 1);
+            const diasPassados = Math.floor((agora - inicioAno) / (24 * 60 * 60 * 1000));
+            const semana = Math.ceil((diasPassados + inicioAno.getDay() + 1) / 7);
+            return `${agora.getFullYear()}-S${semana.toString().padStart(2, '0')}`;
+        }
+        
+        function atualizarInterfaceCotacaoSemanal() {
+            // Atualizar período atual
+            const periodoElement = document.getElementById('periodo-atual');
+            const statusElement = document.getElementById('status-cotacao');
+            const btnToggle = document.getElementById('btn-toggle-cotacao');
+            
+            if (cotacaoAtual && cotacaoAtual.status === 'ativa') {
+                const dataInicio = new Date(cotacaoAtual.dataInicio).toLocaleDateString('pt-BR');
+                const dataFim = new Date(cotacaoAtual.dataFim).toLocaleDateString('pt-BR');
+                
+                periodoElement.textContent = `${cotacaoAtual.semana} • ${dataInicio} até ${dataFim}`;
+                statusElement.textContent = '🟢 ATIVA';
+                statusElement.className = 'px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800';
+                
+                btnToggle.textContent = '🔒 Finalizar Cotação';
+                btnToggle.className = 'px-6 py-3 rounded-lg font-medium transition-colors bg-red-600 text-white hover:bg-red-700';
+            } else {
+                periodoElement.textContent = 'Nenhuma cotação ativa';
+                statusElement.textContent = '🔴 INATIVA';
+                statusElement.className = 'px-4 py-2 rounded-full text-sm font-bold bg-red-100 text-red-800';
+                
+                btnToggle.textContent = '🚀 Iniciar Nova Cotação';
+                btnToggle.className = 'px-6 py-3 rounded-lg font-medium transition-colors bg-green-600 text-white hover:bg-green-700';
+            }
+            
+            // Atualizar estatísticas
+            atualizarEstatisticasSemana();
+            
+            // Atualizar lista de produtos
+            atualizarListaProdutosSemana();
+            
+            // Atualizar histórico
+            atualizarHistoricoCotacoes();
+        }
+        
+        function atualizarEstatisticasSemana() {
+            const totalProdutos = cotacaoAtual ? cotacaoAtual.produtos.length : 0;
+            const totalCotacoes = cotacaoAtual ? cotacaoAtual.cotacoes.length : 0;
+            const fornecedoresUnicos = cotacaoAtual ? [...new Set(cotacaoAtual.cotacoes.map(c => c.fornecedorNome))].length : 0;
+            
+            document.getElementById('total-produtos-semana').textContent = totalProdutos;
+            document.getElementById('total-cotacoes-semana').textContent = totalCotacoes;
+            document.getElementById('total-fornecedores-semana').textContent = fornecedoresUnicos;
+        }
+        
+        function importarArquivoProdutos() {
+            const arquivo = document.getElementById('arquivo-produtos').files[0];
+            
+            if (!arquivo) {
+                mostrarNotificacao('Selecione um arquivo primeiro!', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const conteudo = e.target.result;
+                    processarListaProdutos(conteudo);
+                } catch (error) {
+                    mostrarNotificacao('Erro ao ler o arquivo!', 'error');
+                }
+            };
+            
+            reader.readAsText(arquivo);
+        }
+        
+        function importarListaManual() {
+            const conteudo = document.getElementById('lista-manual').value.trim();
+            
+            if (!conteudo) {
+                mostrarNotificacao('Digite ou cole uma lista de produtos!', 'error');
+                return;
+            }
+            
+            processarListaProdutos(conteudo);
+        }
+        
+        function processarListaProdutos(conteudo) {
+            if (!cotacaoAtual || cotacaoAtual.status !== 'ativa') {
+                mostrarNotificacao('Inicie uma cotação semanal primeiro!', 'error');
+                return;
+            }
+            
+            const linhas = conteudo.split('\n').filter(linha => linha.trim());
+            let produtosAdicionados = 0;
+            let erros = 0;
+            
+            linhas.forEach(linha => {
+                try {
+                    // Limpar e dividir a linha
+                    const partes = linha.split(/[,;]/).map(p => p.trim());
+                    
+                    if (partes.length < 2) {
+                        erros++;
+                        return;
+                    }
+                    
+                    const nome = partes[0];
+                    const quantidade = parseInt(partes[1]);
+                    let precoReferencia = null;
+                    
+                    // Tentar extrair preço se fornecido
+                    if (partes.length >= 3) {
+                        const precoTexto = partes[2].replace(/[R$\s]/g, '').replace(',', '.');
+                        precoReferencia = parseFloat(precoTexto);
+                        if (isNaN(precoReferencia)) precoReferencia = null;
+                    }
+                    
+                    if (!nome || isNaN(quantidade) || quantidade <= 0) {
+                        erros++;
+                        return;
+                    }
+                    
+                    // Verificar se produto já existe
+                    const produtoExistente = cotacaoAtual.produtos.find(p => p.nome.toLowerCase() === nome.toLowerCase());
+                    if (produtoExistente) {
+                        erros++;
+                        return;
+                    }
+                    
+                    const produto = {
+                        id: Date.now() + Math.random(),
+                        nome,
+                        quantidade,
+                        precoReferencia,
+                        dataAdicao: new Date().toISOString()
+                    };
+                    
+                    cotacaoAtual.produtos.push(produto);
+                    produtosAdicionados++;
+                    
+                } catch (error) {
+                    erros++;
+                }
+            });
+            
+            if (produtosAdicionados > 0) {
+                BancoDados.salvar('cotacaoAtual', cotacaoAtual);
+                atualizarInterfaceCotacaoSemanal();
+                atualizarInterfaceFornecedor();
+                
+                mostrarNotificacao(`${produtosAdicionados} produto(s) adicionado(s) com sucesso!`, 'success');
+                
+                // Limpar campos
+                document.getElementById('lista-manual').value = '';
+                document.getElementById('arquivo-produtos').value = '';
+            }
+            
+            if (erros > 0) {
+                mostrarNotificacao(`${erros} linha(s) com erro foram ignoradas!`, 'error');
+            }
+        }
+        
+        function adicionarProdutoManual() {
+            if (!cotacaoAtual || cotacaoAtual.status !== 'ativa') {
+                mostrarNotificacao('Inicie uma cotação semanal primeiro!', 'error');
+                return;
+            }
+            
+            const nome = prompt('Nome do produto:');
+            if (!nome) return;
+            
+            const quantidade = parseInt(prompt('Quantidade:'));
+            if (!quantidade || quantidade <= 0) {
+                mostrarNotificacao('Quantidade inválida!', 'error');
+                return;
+            }
+            
+            const precoTexto = prompt('Preço de referência (opcional):');
+            let precoReferencia = null;
+            if (precoTexto) {
+                precoReferencia = parseFloat(precoTexto.replace(/[R$\s]/g, '').replace(',', '.'));
+                if (isNaN(precoReferencia)) precoReferencia = null;
+            }
+            
+            // Verificar se produto já existe
+            const produtoExistente = cotacaoAtual.produtos.find(p => p.nome.toLowerCase() === nome.toLowerCase());
+            if (produtoExistente) {
+                mostrarNotificacao('Produto já existe na lista!', 'error');
+                return;
+            }
+            
+            const produto = {
+                id: Date.now(),
+                nome,
+                quantidade,
+                precoReferencia,
+                dataAdicao: new Date().toISOString()
+            };
+            
+            cotacaoAtual.produtos.push(produto);
+            BancoDados.salvar('cotacaoAtual', cotacaoAtual);
+            
+            atualizarInterfaceCotacaoSemanal();
+            atualizarInterfaceFornecedor();
+            
+            mostrarNotificacao('Produto adicionado com sucesso!', 'success');
+        }
+        
+        function removerProdutoSemana(produtoId) {
+            if (!cotacaoAtual) return;
+            
+            cotacaoAtual.produtos = cotacaoAtual.produtos.filter(p => p.id !== produtoId);
+            
+            // Remover cotações relacionadas
+            cotacaoAtual.cotacoes = cotacaoAtual.cotacoes.filter(c => c.produtoId !== produtoId);
+            
+            BancoDados.salvar('cotacaoAtual', cotacaoAtual);
+            
+            atualizarInterfaceCotacaoSemanal();
+            atualizarInterfaceFornecedor();
+            
+            mostrarNotificacao('Produto removido!', 'info');
+        }
+        
+        function limparListaSemana() {
+            if (!cotacaoAtual) return;
+            
+            if (confirm('Tem certeza que deseja limpar toda a lista de produtos?')) {
+                cotacaoAtual.produtos = [];
+                cotacaoAtual.cotacoes = [];
+                
+                BancoDados.salvar('cotacaoAtual', cotacaoAtual);
+                
+                atualizarInterfaceCotacaoSemanal();
+                atualizarInterfaceFornecedor();
+                
+                mostrarNotificacao('Lista limpa!', 'info');
+            }
+        }
+        
+        function atualizarListaProdutosSemana() {
+            const container = document.getElementById('produtos-semana-lista');
+            
+            if (!cotacaoAtual || cotacaoAtual.produtos.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhum produto adicionado ainda</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Produto</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Quantidade</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Preço Referência</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Cotações</th>
+                                <th class="text-left py-3 px-4 font-medium text-gray-700">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${cotacaoAtual.produtos.map(produto => {
+                                const cotacoesProduto = cotacaoAtual.cotacoes.filter(c => c.produtoId === produto.id);
+                                return `
+                                    <tr class="border-b border-gray-100 hover:bg-gray-50">
+                                        <td class="py-3 px-4 font-medium">${produto.nome}</td>
+                                        <td class="py-3 px-4">${produto.quantidade}</td>
+                                        <td class="py-3 px-4">
+                                            ${produto.precoReferencia ? 
+                                                `<span class="text-green-600 font-medium">R$ ${produto.precoReferencia.toFixed(2)}</span>` : 
+                                                '<span class="text-gray-400">Não informado</span>'
+                                            }
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <span class="px-2 py-1 rounded-full text-xs font-medium ${cotacoesProduto.length > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                                ${cotacoesProduto.length} recebida(s)
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4">
+                                            <button onclick="removerProdutoSemana(${produto.id})" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                                                🗑️ Remover
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+        
+        function atualizarHistoricoCotacoes() {
+            const container = document.getElementById('historico-cotacoes-semanais');
+            
+            if (cotacoesSemanais.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhuma cotação semanal finalizada ainda</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="space-y-4">
+                    ${cotacoesSemanais.slice().reverse().map(cotacao => {
+                        const dataInicio = new Date(cotacao.dataInicio).toLocaleDateString('pt-BR');
+                        const dataFim = new Date(cotacao.dataFim).toLocaleDateString('pt-BR');
+                        const fornecedoresUnicos = [...new Set(cotacao.cotacoes.map(c => c.fornecedorNome))].length;
+                        
+                        return `
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <div class="flex justify-between items-center mb-3">
+                                    <div>
+                                        <h4 class="font-bold text-gray-800">${cotacao.semana}</h4>
+                                        <p class="text-sm text-gray-600">${dataInicio} até ${dataFim}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <span class="px-3 py-1 rounded-full text-xs font-medium ${cotacao.status === 'finalizada' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'}">
+                                            ${cotacao.status === 'finalizada' ? '✅ Finalizada' : '⏰ Expirada'}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-3 gap-4 text-center">
+                                    <div class="bg-white rounded p-3">
+                                        <p class="text-lg font-bold text-blue-600">${cotacao.produtos.length}</p>
+                                        <p class="text-xs text-gray-600">Produtos</p>
+                                    </div>
+                                    <div class="bg-white rounded p-3">
+                                        <p class="text-lg font-bold text-green-600">${cotacao.cotacoes.length}</p>
+                                        <p class="text-xs text-gray-600">Cotações</p>
+                                    </div>
+                                    <div class="bg-white rounded p-3">
+                                        <p class="text-lg font-bold text-purple-600">${fornecedoresUnicos}</p>
+                                        <p class="text-xs text-gray-600">Fornecedores</p>
+                                    </div>
+                                </div>
+                                
+                                <button onclick="verDetalhesCotacao('${cotacao.id}')" class="mt-3 w-full bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors font-medium text-sm">
+                                    👁️ Ver Detalhes
+                                </button>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+        
+        function verDetalhesCotacao(cotacaoId) {
+            const cotacao = cotacoesSemanais.find(c => c.id == cotacaoId);
+            if (!cotacao) return;
+            
+            // Criar modal com detalhes
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+            
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-4xl w-full max-h-full overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">Detalhes - ${cotacao.semana}</h2>
+                            <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800 mb-3">📦 Produtos Solicitados</h3>
+                                <div class="space-y-2 max-h-60 overflow-y-auto">
+                                    ${cotacao.produtos.map(produto => `
+                                        <div class="bg-gray-50 rounded p-3">
+                                            <p class="font-medium">${produto.nome}</p>
+                                            <p class="text-sm text-gray-600">Qtd: ${produto.quantidade}</p>
+                                            ${produto.precoReferencia ? `<p class="text-sm text-green-600">Ref: R$ ${produto.precoReferencia.toFixed(2)}</p>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800 mb-3">💰 Cotações Recebidas</h3>
+                                <div class="space-y-2 max-h-60 overflow-y-auto">
+                                    ${cotacao.cotacoes.map(cotacao => {
+                                        const produto = cotacao.produtos.find(p => p.id === cotacao.produtoId);
+                                        return `
+                                            <div class="bg-gray-50 rounded p-3">
+                                                <p class="font-medium">${cotacao.fornecedorNome}</p>
+                                                <p class="text-sm text-gray-600">${produto ? produto.nome : 'Produto não encontrado'}</p>
+                                                <p class="text-sm text-green-600">R$ ${cotacao.precoUnitario.toFixed(2)} • ${cotacao.prazoEntrega} dias</p>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function atualizarCotacaoSemanalFornecedor() {
+            const container = document.getElementById('produtos-cotacao-semanal');
+            const statusElement = document.getElementById('status-cotacao-fornecedor');
+            
+            if (!cotacaoAtual || cotacaoAtual.status !== 'ativa') {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhuma cotação semanal ativa no momento</div>';
+                statusElement.textContent = '🔴 INATIVA';
+                statusElement.className = 'px-4 py-2 rounded-full text-sm font-bold bg-red-100 text-red-800';
+                return;
+            }
+            
+            statusElement.textContent = '🟢 ATIVA';
+            statusElement.className = 'px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800';
+            
+            if (cotacaoAtual.produtos.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">Aguardando produtos serem adicionados pelo comprador...</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="mb-4">
+                    <p class="text-gray-600 mb-2"><strong>Período:</strong> ${new Date(cotacaoAtual.dataInicio).toLocaleDateString('pt-BR')} até ${new Date(cotacaoAtual.dataFim).toLocaleDateString('pt-BR')}</p>
+                    <p class="text-gray-600"><strong>Semana:</strong> ${cotacaoAtual.semana}</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    ${cotacaoAtual.produtos.map(produto => {
+                        const jaCotou = cotacaoAtual.cotacoes.some(c => c.produtoId === produto.id && c.fornecedorNome === fornecedorAtual.nome);
+                        
+                        return `
+                            <div class="bg-gray-50 rounded-lg p-4 border ${jaCotou ? 'border-green-300 bg-green-50' : 'border-gray-200'}">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h4 class="font-bold text-gray-800">${produto.nome}</h4>
+                                    ${jaCotou ? 
+                                        '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">✅ Cotado</span>' : 
+                                        '<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">⏳ Pendente</span>'
+                                    }
+                                </div>
+                                
+                                <div class="space-y-2 text-sm text-gray-600 mb-4">
+                                    <p><strong>Quantidade:</strong> ${produto.quantidade}</p>
+                                    ${produto.precoReferencia ? 
+                                        `<p><strong>Preço Referência:</strong> <span class="text-green-600 font-medium">R$ ${produto.precoReferencia.toFixed(2)}</span></p>` : 
+                                        '<p class="text-gray-400">Sem preço de referência</p>'
+                                    }
+                                </div>
+                                
+                                ${!jaCotou ? `
+                                    <div class="space-y-2">
+                                        <input type="number" id="preco-semanal-${produto.id}" placeholder="Preço unitário" min="0" step="0.01" 
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        <input type="number" id="prazo-semanal-${produto.id}" placeholder="Prazo (dias)" min="1" value="${fornecedorAtual.prazoEntrega}"
+                                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                        <button onclick="enviarCotacaoSemanal(${produto.id})" class="w-full bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors font-medium text-sm">
+                                            💰 Enviar Cotação
+                                        </button>
+                                    </div>
+                                ` : `
+                                    <div class="bg-green-100 border border-green-200 rounded p-3">
+                                        <p class="text-green-800 text-sm">✅ Cotação enviada com sucesso!</p>
+                                    </div>
+                                `}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 class="font-bold text-blue-800 mb-2">💡 Dicas para Fornecedores:</h4>
+                    <ul class="text-blue-700 text-sm space-y-1">
+                        <li>• Compare com o preço de referência quando disponível</li>
+                        <li>• Considere descontos para grandes quantidades</li>
+                        <li>• Seja competitivo mas mantenha sua margem</li>
+                        <li>• Prazos menores podem ser um diferencial</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        function enviarCotacaoSemanal(produtoId) {
+            const precoInput = document.getElementById(`preco-semanal-${produtoId}`);
+            const prazoInput = document.getElementById(`prazo-semanal-${produtoId}`);
+            
+            if (!precoInput.value || !prazoInput.value) {
+                mostrarNotificacao('Preencha preço e prazo!', 'error');
+                return;
+            }
+            
+            const produto = cotacaoAtual.produtos.find(p => p.id === produtoId);
+            if (!produto) return;
+            
+            const cotacao = {
+                id: Date.now() + Math.random(),
+                produtoId: produtoId,
+                produtoNome: produto.nome,
+                fornecedorNome: fornecedorAtual.nome,
+                precoUnitario: parseFloat(precoInput.value),
+                prazoEntrega: parseInt(prazoInput.value),
+                data: new Date().toLocaleDateString('pt-BR'),
+                tipo: 'semanal'
+            };
+            
+            cotacaoAtual.cotacoes.push(cotacao);
+            BancoDados.salvar('cotacaoAtual', cotacaoAtual);
+            
+            atualizarCotacaoSemanalFornecedor();
+            atualizarInterfaceCotacaoSemanal();
+            
+            mostrarNotificacao(`Cotação para ${produto.nome} enviada com sucesso!`, 'success');
+        }
+
         // Notificações
         function mostrarNotificacao(mensagem, tipo) {
             const cores = {
@@ -1222,5 +1950,5 @@
             carregarDadosSalvos();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9909a7f456b7009f',t:'MTc2MDgwNzQ5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9909b963f416009f',t:'MTc2MDgwODIxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
