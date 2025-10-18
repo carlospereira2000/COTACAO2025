@@ -151,7 +151,7 @@
                         <div class="bg-green-50 rounded-lg p-4 border border-green-200">
                             <h4 class="font-bold text-green-800 mb-3">✏️ Entrada Manual</h4>
                             <p class="text-green-700 text-sm mb-3">Cole sua lista aqui (um produto por linha)</p>
-                            <textarea id="lista-manual" placeholder="Produto A, 10, R$ 15.50&#10;Produto B, 5, R$ 25.00&#10;Produto C, 20" class="w-full h-20 px-3 py-2 border border-green-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"></textarea>
+                            <textarea id="lista-manual" placeholder="Produto A&#10;Produto B, 5&#10;Produto C, 20, R$ 15.50" class="w-full h-20 px-3 py-2 border border-green-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"></textarea>
                             <button onclick="importarListaManual()" class="w-full mt-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors font-medium">
                                 ✅ Processar Lista
                             </button>
@@ -160,15 +160,19 @@
 
                     <!-- Exemplo de Formato -->
                     <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                        <h5 class="font-bold text-gray-800 mb-2">💡 Formato Esperado:</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <h5 class="font-bold text-gray-800 mb-2">💡 Formatos Aceitos:</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                             <div>
-                                <p class="font-medium text-gray-700 mb-1">Com preço de referência:</p>
-                                <code class="bg-white p-2 rounded border text-xs block">Produto A, 10, R$ 15.50<br>Produto B, 5, R$ 25.00</code>
+                                <p class="font-medium text-gray-700 mb-1">Apenas nomes:</p>
+                                <code class="bg-white p-2 rounded border text-xs block">Produto A<br>Produto B<br>Produto C</code>
                             </div>
                             <div>
-                                <p class="font-medium text-gray-700 mb-1">Apenas nome e quantidade:</p>
+                                <p class="font-medium text-gray-700 mb-1">Com quantidade:</p>
                                 <code class="bg-white p-2 rounded border text-xs block">Produto A, 10<br>Produto B, 5</code>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-700 mb-1">Completo (opcional):</p>
+                                <code class="bg-white p-2 rounded border text-xs block">Produto A, 10, R$ 15.50<br>Produto B, 5, R$ 25.00</code>
                             </div>
                         </div>
                     </div>
@@ -1514,23 +1518,43 @@
                     // Limpar e dividir a linha
                     const partes = linha.split(/[,;]/).map(p => p.trim());
                     
-                    if (partes.length < 2) {
+                    if (partes.length < 1 || !partes[0]) {
                         erros++;
                         return;
                     }
                     
                     const nome = partes[0];
-                    const quantidade = parseInt(partes[1]);
+                    let quantidade = 1; // Quantidade padrão
                     let precoReferencia = null;
                     
-                    // Tentar extrair preço se fornecido
-                    if (partes.length >= 3) {
-                        const precoTexto = partes[2].replace(/[R$\s]/g, '').replace(',', '.');
-                        precoReferencia = parseFloat(precoTexto);
-                        if (isNaN(precoReferencia)) precoReferencia = null;
+                    // Se tem segunda parte, pode ser quantidade ou preço
+                    if (partes.length >= 2) {
+                        const segundaParte = partes[1];
+                        
+                        // Se começa com R$ ou tem vírgula/ponto, é preço
+                        if (segundaParte.includes('R$') || segundaParte.includes(',') || segundaParte.includes('.')) {
+                            const precoTexto = segundaParte.replace(/[R$\s]/g, '').replace(',', '.');
+                            precoReferencia = parseFloat(precoTexto);
+                            if (isNaN(precoReferencia)) precoReferencia = null;
+                        } else {
+                            // Senão, é quantidade
+                            const qtd = parseInt(segundaParte);
+                            if (!isNaN(qtd) && qtd > 0) {
+                                quantidade = qtd;
+                            }
+                        }
                     }
                     
-                    if (!nome || isNaN(quantidade) || quantidade <= 0) {
+                    // Tentar extrair preço da terceira parte se existir
+                    if (partes.length >= 3) {
+                        const precoTexto = partes[2].replace(/[R$\s]/g, '').replace(',', '.');
+                        const preco = parseFloat(precoTexto);
+                        if (!isNaN(preco)) {
+                            precoReferencia = preco;
+                        }
+                    }
+                    
+                    if (!nome) {
                         erros++;
                         return;
                     }
@@ -1950,5 +1974,5 @@
             carregarDadosSalvos();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9909b963f416009f',t:'MTc2MDgwODIxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9909c5f4d435009f',t:'MTc2MDgwODcyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
