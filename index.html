@@ -50,34 +50,24 @@
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full">
     <!-- Tela de Login -->
-    <div id="login-screen" class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full flex items-center justify-center px-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
-            <!-- Logo do Supermercado -->
-            <div class="text-center mb-4" id="logo-container">
-                <div class="w-20 h-20 mx-auto mb-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                    <div class="text-red-500 text-2xl font-bold" id="logo-inicial">
-                        FF
-                    </div>
-                </div>
-                <input type="text" id="nome-supermercado" placeholder="Nome do seu supermercado" 
-                       class="w-full text-center font-bold text-lg text-gray-800 border-0 bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1"
-                       value="Família Formento" onchange="atualizarNomeSupermercado()">
-            </div>
-            
-            <div class="text-center mb-6">
-                <h1 class="text-xl font-bold text-gray-800 mb-1">Sistema de Cotação</h1>
-                <p class="text-gray-600 text-sm">Colaborativo e Inteligente</p>
+    <div id="login-screen" class="login-container min-h-full flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Sistema de Cotação</h1>
+                <p class="text-gray-600">Colaborativo e Inteligente</p>
                 <div class="mt-2 text-xs text-green-600 font-medium">💾 Dados salvos automaticamente</div>
             </div>
             
-            <div class="space-y-3">
-                <button id="btn-comprador" class="w-full bg-blue-600 text-white py-2.5 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center text-sm">
+            <div class="space-y-4">
+                <button onclick="fazerLogin('comprador')" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center">
                     🛒 Entrar como Comprador
                 </button>
-                <button id="btn-fornecedor" class="w-full bg-green-600 text-white py-2.5 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center text-sm">
+                <button onclick="fazerLogin('fornecedor')" class="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center">
                     🏢 Entrar como Fornecedor
                 </button>
             </div>
+            
+
         </div>
     </div>
 
@@ -86,18 +76,9 @@
         <div class="container mx-auto px-4 py-6">
             <!-- Header Comprador -->
             <header class="flex justify-between items-center mb-8">
-                <div class="flex items-center gap-4">
-                    <!-- Logo do Supermercado -->
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                        <div class="text-red-500 text-xl font-bold">
-                            FF
-                        </div>
-                    </div>
-                    <div>
-                        <h1 class="text-3xl font-bold text-gray-800 mb-1" id="nome-supermercado-comprador">Família Formento</h1>
-                        <h2 class="text-xl font-bold text-blue-600 mb-1">Painel do Comprador</h2>
-                        <p class="text-gray-600 text-sm">Gerencie seus produtos e analise as melhores cotações</p>
-                    </div>
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-800 mb-2">Painel do Comprador</h1>
+                    <p class="text-gray-600">Gerencie seus produtos e analise as melhores cotações</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <!-- Badge de Notificações -->
@@ -446,18 +427,9 @@
         <div class="container mx-auto px-4 py-6">
             <!-- Header Fornecedor -->
             <header class="flex justify-between items-center mb-8">
-                <div class="flex items-center gap-4">
-                    <!-- Logo do Supermercado -->
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
-                        <div class="text-red-500 text-xl font-bold">
-                            FF
-                        </div>
-                    </div>
-                    <div>
-                        <h1 class="text-3xl font-bold text-gray-800 mb-1" id="nome-supermercado-fornecedor">Família Formento</h1>
-                        <h2 class="text-xl font-bold text-green-600 mb-1">Painel do Fornecedor</h2>
-                        <p class="text-gray-600 text-sm">Envie suas melhores propostas para os compradores</p>
-                    </div>
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-800 mb-2">Painel do Fornecedor</h1>
+                    <p class="text-gray-600">Envie suas melhores propostas para os compradores</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="text-right">
@@ -635,23 +607,6 @@
             nome: 'Fornecedor Exemplo',
             prazoEntrega: 7
         };
-        
-        // Função para atualizar nome do supermercado
-        function atualizarNomeSupermercado() {
-            const nome = document.getElementById('nome-supermercado').value || 'Família Formento';
-            BancoDados.salvar('nomeSupermercado', nome);
-            
-            // Atualizar em todos os lugares
-            const elementos = [
-                'nome-supermercado-comprador',
-                'nome-supermercado-fornecedor'
-            ];
-            
-            elementos.forEach(id => {
-                const elemento = document.getElementById(id);
-                if (elemento) elemento.textContent = nome;
-            });
-        }
 
         // Carregar dados salvos ao iniciar
         function carregarDadosSalvos() {
@@ -665,62 +620,56 @@
                 fornecedorAtual = fornecedorSalvo;
             }
             
-            // Carregar nome do supermercado
-            const nomeSupermercado = BancoDados.carregar('nomeSupermercado', 'Família Formento');
-            const inputNome = document.getElementById('nome-supermercado');
-            if (inputNome) {
-                inputNome.value = nomeSupermercado;
-            }
-            
             // Verificar se há cotação ativa e se já expirou
             verificarCotacaoAtiva();
             atualizarEstatisticas();
         }
 
         // Sistema de Login
-        function loginDiretoComprador() {
-            tipoUsuario = 'comprador';
-            usuarioAtual = 'Eduardo - Comprador';
+        function fazerLogin(tipo) {
+            if (tipo === 'comprador') {
+                // Mostrar formulário de login para comprador
+                document.getElementById('login-screen').innerHTML = `
+                    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+                        <div class="text-center mb-8">
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">Login Comprador</h1>
+                            <p class="text-gray-600">Digite suas credenciais</p>
+                        </div>
+                        
+                        <form onsubmit="loginComprador(event)" class="space-y-4">
+                            <div>
+                                <label for="login-usuario" class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
+                                <input type="text" id="login-usuario" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label for="login-senha" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                                <input type="password" id="login-senha" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                🔐 Entrar
+                            </button>
+                        </form>
+                        
+                        <button onclick="voltarTelaLogin()" class="w-full mt-4 text-gray-600 hover:text-gray-800 text-sm">
+                            ← Voltar
+                        </button>
+                    </div>
+                `;
+                return;
+            }
             
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('comprador-interface').classList.remove('hidden');
-            
-            // Atualizar nome do supermercado no painel
-            const nomeSupermercado = BancoDados.carregar('nomeSupermercado', 'Família Formento');
-            document.getElementById('nome-supermercado-comprador').textContent = nomeSupermercado;
-            
-            showCompradorTab('cotacoes-semanais');
-            atualizarInterfaceComprador();
-            atualizarEstatisticas();
-            
-            mostrarNotificacao(`Bem-vindo, ${usuarioAtual}!`, 'success');
-        }
-        
-        function loginDiretoFornecedor() {
-            tipoUsuario = 'fornecedor';
+            // Login direto para fornecedor
+            tipoUsuario = tipo;
             usuarioAtual = 'Fornecedor Exemplo';
             
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('fornecedor-interface').classList.remove('hidden');
-            
-            // Atualizar nome do supermercado no painel
-            const nomeSupermercado = BancoDados.carregar('nomeSupermercado', 'Família Formento');
-            document.getElementById('nome-supermercado-fornecedor').textContent = nomeSupermercado;
-            
             document.getElementById('nome-fornecedor-logado').textContent = fornecedorAtual.nome;
             document.getElementById('nome-empresa').value = fornecedorAtual.nome;
             document.getElementById('prazo-padrao').value = fornecedorAtual.prazoEntrega;
             atualizarInterfaceFornecedor();
             
             mostrarNotificacao(`Bem-vindo, ${usuarioAtual}!`, 'success');
-        }
-        
-        function fazerLogin(tipo) {
-            if (tipo === 'comprador') {
-                loginDiretoComprador();
-            } else {
-                loginDiretoFornecedor();
-            }
         }
         
         function voltarTelaLogin() {
@@ -739,11 +688,6 @@
                 
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('comprador-interface').classList.remove('hidden');
-                
-                // Atualizar nome do supermercado no painel
-                const nomeSupermercado = BancoDados.carregar('nomeSupermercado', 'Família Formento');
-                document.getElementById('nome-supermercado-comprador').textContent = nomeSupermercado;
-                
                 showCompradorTab('cotacoes-semanais');
                 atualizarInterfaceComprador();
                 atualizarEstatisticas();
@@ -1269,7 +1213,7 @@
             }
         }
 
-        // Análise Inteligente para Comprador - VERSÃO CORRIGIDA
+        // Análise Inteligente para Comprador - NOVA VERSÃO MELHORADA
         function gerarAnaliseComprador() {
             const container = document.getElementById('resultado-analise-comprador');
             
@@ -1288,272 +1232,291 @@
                 }
             });
             
-            if (todasCotacoes.length === 0) {
+            if (solicitacoes.length === 0 && (!cotacaoAtual || cotacaoAtual.produtos.length === 0)) {
                 container.innerHTML = `
-                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-                        <div class="text-4xl mb-4">📊</div>
-                        <h3 class="text-xl font-bold text-blue-800 mb-2">Aguardando Cotações</h3>
-                        <p class="text-blue-700">Ainda não há cotações suficientes para gerar a análise inteligente.</p>
-                        <p class="text-blue-600 text-sm mt-2">As cotações dos fornecedores aparecerão aqui automaticamente.</p>
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p class="text-yellow-800">⚠️ Para gerar a análise, você precisa ter produtos solicitados e cotações recebidas.</p>
                     </div>
                 `;
                 return;
             }
             
-            // Processar cotações individuais
-            const cotacoesIndividuais = todasCotacoes.filter(c => c.solicitacaoId);
-            const cotacoesSemanaisAtivas = todasCotacoes.filter(c => c.produtoId || c.tipo === 'semanal');
+            if (todasCotacoes.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-blue-800">📊 Produtos cadastrados, mas ainda aguardando cotações dos fornecedores.</p>
+                    </div>
+                `;
+                return;
+            }
             
-            let analiseHtml = '<div class="space-y-6">';
-            
-            // ANÁLISE DE COTAÇÕES INDIVIDUAIS
-            if (cotacoesIndividuais.length > 0) {
-                // Agrupar cotações individuais por fornecedor
-                const cotacoesIndividuaisPorFornecedor = {};
-                cotacoesIndividuais.forEach(cotacao => {
+            // Agrupar TODAS as cotações por fornecedor
+            const todasCotacoesPorFornecedor = {};
+            todasCotacoes.forEach(cotacao => {
+                if (!todasCotacoesPorFornecedor[cotacao.fornecedorNome]) {
+                    todasCotacoesPorFornecedor[cotacao.fornecedorNome] = [];
+                }
+                
+                // Para cotações individuais
+                if (cotacao.solicitacaoId) {
                     const solicitacao = solicitacoes.find(s => s.id === cotacao.solicitacaoId);
                     if (solicitacao) {
-                        if (!cotacoesIndividuaisPorFornecedor[cotacao.fornecedorNome]) {
-                            cotacoesIndividuaisPorFornecedor[cotacao.fornecedorNome] = [];
-                        }
-                        cotacoesIndividuaisPorFornecedor[cotacao.fornecedorNome].push({
+                        todasCotacoesPorFornecedor[cotacao.fornecedorNome].push({
                             ...cotacao,
                             solicitacao,
                             precoTotal: cotacao.precoUnitario * solicitacao.quantidade
                         });
                     }
-                });
+                }
+                // Para cotações semanais
+                else if (cotacao.produtoId) {
+                    const produto = cotacaoAtual ? cotacaoAtual.produtos.find(p => p.id === cotacao.produtoId) : null;
+                    if (produto) {
+                        todasCotacoesPorFornecedor[cotacao.fornecedorNome].push({
+                            ...cotacao,
+                            solicitacao: { nome: produto.nome, quantidade: produto.quantidade },
+                            precoTotal: cotacao.precoUnitario * produto.quantidade
+                        });
+                    }
+                }
+            });
+
+            // Encontrar melhor cotação para cada produto
+            const melhoresCotacoes = [];
+            
+            solicitacoes.forEach(solicitacao => {
+                const cotacoesProduto = cotacoes.filter(c => c.solicitacaoId === solicitacao.id);
                 
-                // Encontrar melhor fornecedor para cotações individuais
-                const fornecedoresIndividuais = Object.keys(cotacoesIndividuaisPorFornecedor).map(fornecedorNome => {
-                    const cotacoesFornecedor = cotacoesIndividuaisPorFornecedor[fornecedorNome];
-                    const valorTotal = cotacoesFornecedor.reduce((acc, c) => acc + c.precoTotal, 0);
-                    const prazoMedio = Math.round(cotacoesFornecedor.reduce((acc, c) => acc + c.prazoEntrega, 0) / cotacoesFornecedor.length);
+                if (cotacoesProduto.length === 0) return;
+                
+                // Calcular scores para cada cotação do produto
+                const cotacoesComScore = cotacoesProduto.map(cotacao => {
+                    const precoTotal = cotacao.precoUnitario * solicitacao.quantidade;
+                    
+                    const precoMin = Math.min(...cotacoesProduto.map(c => c.precoUnitario * solicitacao.quantidade));
+                    const precoMax = Math.max(...cotacoesProduto.map(c => c.precoUnitario * solicitacao.quantidade));
+                    const prazoMin = Math.min(...cotacoesProduto.map(c => c.prazoEntrega));
+                    const prazoMax = Math.max(...cotacoesProduto.map(c => c.prazoEntrega));
+                    
+                    const scorePreco = precoMax === precoMin ? 1 : (precoMax - precoTotal) / (precoMax - precoMin);
+                    const scorePrazo = prazoMax === prazoMin ? 1 : (prazoMax - cotacao.prazoEntrega) / (prazoMax - prazoMin);
+                    const scoreTotal = (scorePreco * 0.7) + (scorePrazo * 0.3);
                     
                     return {
-                        fornecedorNome,
-                        cotacoes: cotacoesFornecedor,
-                        valorTotal,
-                        prazoMedio,
-                        quantidadeProdutos: cotacoesFornecedor.length
+                        ...cotacao,
+                        solicitacao,
+                        precoTotal,
+                        scoreTotal
                     };
                 });
                 
-                fornecedoresIndividuais.sort((a, b) => a.valorTotal - b.valorTotal);
-                const melhorFornecedorIndividual = fornecedoresIndividuais[0];
+                // Pegar a melhor cotação para este produto
+                cotacoesComScore.sort((a, b) => b.scoreTotal - a.scoreTotal);
+                melhoresCotacoes.push(cotacoesComScore[0]);
+            });
+            
+            // Agrupar melhores cotações por fornecedor
+            const cotacoesPorFornecedor = {};
+            melhoresCotacoes.forEach(cotacao => {
+                if (!cotacoesPorFornecedor[cotacao.fornecedorNome]) {
+                    cotacoesPorFornecedor[cotacao.fornecedorNome] = [];
+                }
+                cotacoesPorFornecedor[cotacao.fornecedorNome].push(cotacao);
+            });
+            
+            // Calcular score geral por fornecedor
+            const fornecedoresComScore = Object.keys(cotacoesPorFornecedor).map(fornecedorNome => {
+                const cotacoesFornecedor = cotacoesPorFornecedor[fornecedorNome];
+                const scoreGeral = cotacoesFornecedor.reduce((acc, cotacao) => acc + cotacao.scoreTotal, 0) / cotacoesFornecedor.length;
+                const valorTotal = cotacoesFornecedor.reduce((acc, cotacao) => acc + cotacao.precoTotal, 0);
+                const prazoMedio = Math.round(cotacoesFornecedor.reduce((acc, cotacao) => acc + cotacao.prazoEntrega, 0) / cotacoesFornecedor.length);
                 
-                analiseHtml += `
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-300">
-                        <h2 class="text-2xl font-bold text-blue-800 mb-4 flex items-center gap-2">
-                            📦 Análise - Cotações Individuais
-                            <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">${cotacoesIndividuais.length} cotações</span>
-                        </h2>
+                return {
+                    fornecedorNome,
+                    cotacoes: cotacoesFornecedor,
+                    scoreGeral,
+                    valorTotal,
+                    prazoMedio,
+                    quantidadeProdutos: cotacoesFornecedor.length
+                };
+            });
+            
+            // Ordenar fornecedores por score
+            fornecedoresComScore.sort((a, b) => b.scoreGeral - a.scoreGeral);
+            const melhorFornecedor = fornecedoresComScore[0];
+            
+            let analiseHtml = `
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-300 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl font-bold text-green-800">🏆 MELHOR FORNECEDOR RECOMENDADO</h2>
+                        <span class="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold pulse-green">ESCOLHA INTELIGENTE</span>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 border border-green-200">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">${melhorFornecedor.fornecedorNome}</h3>
                         
-                        <div class="bg-white rounded-lg p-6 border border-blue-200 mb-4">
-                            <h3 class="text-xl font-bold text-gray-800 mb-4">🏆 Melhor Opção: ${melhorFornecedorIndividual.fornecedorNome}</h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                <div class="bg-blue-50 rounded-lg p-4 text-center">
-                                    <p class="text-2xl font-bold text-blue-600">R$ ${melhorFornecedorIndividual.valorTotal.toFixed(2)}</p>
-                                    <p class="text-sm text-gray-600">Valor Total</p>
-                                </div>
-                                <div class="bg-green-50 rounded-lg p-4 text-center">
-                                    <p class="text-2xl font-bold text-green-600">${melhorFornecedorIndividual.prazoMedio} dias</p>
-                                    <p class="text-sm text-gray-600">Prazo Médio</p>
-                                </div>
-                                <div class="bg-purple-50 rounded-lg p-4 text-center">
-                                    <p class="text-2xl font-bold text-purple-600">${melhorFornecedorIndividual.quantidadeProdutos}</p>
-                                    <p class="text-sm text-gray-600">Produtos</p>
-                                </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-green-50 rounded-lg p-4 text-center">
+                                <p class="text-2xl font-bold text-green-600">R$ ${melhorFornecedor.valorTotal.toFixed(2)}</p>
+                                <p class="text-sm text-gray-600">Valor Total</p>
                             </div>
-                            
-                            <div class="space-y-3">
-                                ${melhorFornecedorIndividual.cotacoes.map(cotacao => `
-                                    <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
-                                        <div>
-                                            <h5 class="font-bold text-gray-800">${cotacao.produtoNome}</h5>
-                                            <p class="text-sm text-gray-600">Qtd: ${cotacao.solicitacao.quantidade} • R$ ${cotacao.precoUnitario.toFixed(2)}/un</p>
-                                        </div>
-                                        <div class="text-right">
-                                            <p class="font-bold text-blue-600">R$ ${cotacao.precoTotal.toFixed(2)}</p>
-                                            <p class="text-sm text-gray-600">${cotacao.prazoEntrega} dias</p>
-                                        </div>
-                                    </div>
-                                `).join('')}
+                            <div class="bg-blue-50 rounded-lg p-4 text-center">
+                                <p class="text-2xl font-bold text-blue-600">${melhorFornecedor.prazoMedio} dias</p>
+                                <p class="text-sm text-gray-600">Prazo Médio</p>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-4 text-center">
+                                <p class="text-2xl font-bold text-purple-600">${(melhorFornecedor.scoreGeral * 100).toFixed(0)}%</p>
+                                <p class="text-sm text-gray-600">Score Geral</p>
                             </div>
                         </div>
                         
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            ${fornecedoresIndividuais.map((fornecedor, index) => {
-                                const ehMelhor = index === 0;
-                                const diferenca = fornecedor.valorTotal - melhorFornecedorIndividual.valorTotal;
-                                
-                                return `
-                                    <div class="bg-white rounded-lg p-4 border ${ehMelhor ? 'border-blue-300 bg-blue-50' : 'border-gray-200'}">
-                                        <div class="flex justify-between items-center mb-3">
-                                            <h4 class="font-bold text-gray-800 flex items-center gap-2">
-                                                ${fornecedor.fornecedorNome}
-                                                ${ehMelhor ? '<span class="bg-blue-500 text-white px-2 py-1 rounded-full text-xs">MELHOR</span>' : ''}
-                                            </h4>
-                                            <div class="text-right">
-                                                <p class="font-bold ${ehMelhor ? 'text-blue-600' : 'text-gray-700'}">R$ ${fornecedor.valorTotal.toFixed(2)}</p>
-                                                ${!ehMelhor && diferenca > 0 ? `<p class="text-sm text-red-600">+R$ ${diferenca.toFixed(2)}</p>` : ''}
-                                            </div>
-                                        </div>
-                                        <p class="text-sm text-gray-600">${fornecedor.quantidadeProdutos} produto(s) • ${fornecedor.prazoMedio} dias médio</p>
-                                    </div>
-                                `;
-                            }).join('')}
+                        <h4 class="text-lg font-bold text-gray-800 mb-3">📋 Lista de Compras Recomendada:</h4>
+                        <div class="space-y-3">
+            `;
+            
+            melhorFornecedor.cotacoes.forEach(cotacao => {
+                analiseHtml += `
+                    <div class="bg-gray-50 rounded-lg p-4 flex justify-between items-center">
+                        <div>
+                            <h5 class="font-bold text-gray-800">${cotacao.produtoNome}</h5>
+                            <p class="text-sm text-gray-600">Quantidade: ${cotacao.solicitacao.quantidade} unidades</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-green-600">R$ ${cotacao.precoTotal.toFixed(2)}</p>
+                            <p class="text-sm text-gray-600">${cotacao.prazoEntrega} dias</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            analiseHtml += `
+                        </div>
+                        
+                        <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div class="p-4 bg-green-100 rounded-lg">
+                                <h5 class="font-bold text-green-800 mb-2">💡 Por que esta é a melhor escolha:</h5>
+                                <ul class="text-green-700 text-sm space-y-1">
+                                    <li>• Melhor custo-benefício considerando preço e prazo</li>
+                                    <li>• Fornecedor com ${melhorFornecedor.quantidadeProdutos} produto(s) disponível(is)</li>
+                                    <li>• Economia de tempo negociando com um único fornecedor</li>
+                                    <li>• Score de ${(melhorFornecedor.scoreGeral * 100).toFixed(0)}% baseado em análise inteligente</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <h5 class="font-bold text-blue-800 mb-2">📋 Lista para Copiar:</h5>
+                                <textarea id="lista-copiar" readonly class="w-full h-24 text-xs bg-white border border-blue-200 rounded p-2 font-mono resize-none">${melhorFornecedor.cotacoes.map(c => `${c.produtoNome} R$ ${c.precoTotal.toFixed(2)}`).join('\n')}</textarea>
+                                <button onclick="copiarLista()" class="mt-2 w-full bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+                                    📋 Copiar Lista
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // NOVA SEÇÃO: Lista completa por fornecedor
+            analiseHtml += `
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">📊 Cotações Detalhadas por Fornecedor</h3>
+                    <div class="space-y-6">
+            `;
+            
+            // Mostrar todos os fornecedores com suas cotações
+            Object.keys(todasCotacoesPorFornecedor).forEach(fornecedorNome => {
+                const cotacoesFornecedor = todasCotacoesPorFornecedor[fornecedorNome];
+                const valorTotalFornecedor = cotacoesFornecedor.reduce((acc, cotacao) => acc + cotacao.precoTotal, 0);
+                const prazoMedioFornecedor = Math.round(cotacoesFornecedor.reduce((acc, cotacao) => acc + cotacao.prazoEntrega, 0) / cotacoesFornecedor.length);
+                
+                // Verificar se é o melhor fornecedor
+                const ehMelhor = fornecedorNome === melhorFornecedor.fornecedorNome;
+                
+                analiseHtml += `
+                    <div class="border rounded-lg p-4 ${ehMelhor ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-gray-50'}">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                    ${fornecedorNome}
+                                    ${ehMelhor ? '<span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">RECOMENDADO</span>' : ''}
+                                </h4>
+                                <p class="text-sm text-gray-600">${cotacoesFornecedor.length} produto(s) cotado(s)</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-bold ${ehMelhor ? 'text-green-600' : 'text-gray-700'}">R$ ${valorTotalFornecedor.toFixed(2)}</p>
+                                <p class="text-sm text-gray-600">${prazoMedioFornecedor} dias médio</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                `;
+                
+                cotacoesFornecedor.forEach(cotacao => {
+                    analiseHtml += `
+                        <div class="bg-white rounded-lg p-3 border border-gray-200">
+                            <h5 class="font-medium text-gray-800 mb-2">${cotacao.produtoNome}</h5>
+                            <div class="space-y-1 text-sm text-gray-600">
+                                <p><span class="font-medium">Qtd:</span> ${cotacao.solicitacao.quantidade}</p>
+                                <p><span class="font-medium">Unit:</span> R$ ${cotacao.precoUnitario.toFixed(2)}</p>
+                                <p><span class="font-medium">Total:</span> <span class="font-bold text-gray-800">R$ ${cotacao.precoTotal.toFixed(2)}</span></p>
+                                <p><span class="font-medium">Prazo:</span> ${cotacao.prazoEntrega} dias</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                analiseHtml += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            analiseHtml += `
+                    </div>
+                </div>
+            `;
+            
+            // Mostrar comparativo com outros fornecedores se houver
+            if (fornecedoresComScore.length > 1) {
+                analiseHtml += `
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">🔍 Comparativo Resumido</h3>
+                        <div class="space-y-3">
+                `;
+                
+                fornecedoresComScore.forEach((fornecedor, index) => {
+                    const diferenca = melhorFornecedor.valorTotal - fornecedor.valorTotal;
+                    const diferencaTexto = diferenca > 0 ? `R$ ${diferenca.toFixed(2)} mais caro` : `R$ ${Math.abs(diferenca).toFixed(2)} mais barato`;
+                    const ehMelhor = index === 0;
+                    
+                    analiseHtml += `
+                        <div class="rounded-lg p-4 ${ehMelhor ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-bold text-gray-800 flex items-center gap-2">
+                                        ${fornecedor.fornecedorNome}
+                                        ${ehMelhor ? '<span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">MELHOR</span>' : ''}
+                                    </h4>
+                                    <p class="text-sm text-gray-600">${fornecedor.quantidadeProdutos} produto(s) • ${fornecedor.prazoMedio} dias médio • Score: ${(fornecedor.scoreGeral * 100).toFixed(0)}%</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold ${ehMelhor ? 'text-green-600' : 'text-gray-700'}">R$ ${fornecedor.valorTotal.toFixed(2)}</p>
+                                    ${!ehMelhor ? `<p class="text-sm ${diferenca > 0 ? 'text-red-600' : 'text-green-600'}">${diferencaTexto}</p>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                analiseHtml += `
                         </div>
                     </div>
                 `;
             }
             
-            // ANÁLISE DE COTAÇÕES SEMANAIS
-            if (cotacoesSemanaisAtivas.length > 0) {
-                // Agrupar cotações semanais por fornecedor
-                const cotacoesSemanaisPorFornecedor = {};
-                cotacoesSemanaisAtivas.forEach(cotacao => {
-                    let produto = null;
-                    
-                    // Buscar produto na cotação atual
-                    if (cotacaoAtual && cotacao.produtoId) {
-                        produto = cotacaoAtual.produtos.find(p => p.id === cotacao.produtoId);
-                    }
-                    
-                    // Buscar produto no histórico se não encontrou
-                    if (!produto) {
-                        cotacoesSemanais.forEach(cs => {
-                            if (cs.produtos && cotacao.produtoId) {
-                                const produtoEncontrado = cs.produtos.find(p => p.id === cotacao.produtoId);
-                                if (produtoEncontrado) produto = produtoEncontrado;
-                            }
-                        });
-                    }
-                    
-                    if (produto) {
-                        if (!cotacoesSemanaisPorFornecedor[cotacao.fornecedorNome]) {
-                            cotacoesSemanaisPorFornecedor[cotacao.fornecedorNome] = [];
-                        }
-                        cotacoesSemanaisPorFornecedor[cotacao.fornecedorNome].push({
-                            ...cotacao,
-                            produto,
-                            precoTotal: cotacao.precoUnitario * produto.quantidade
-                        });
-                    }
-                });
-                
-                if (Object.keys(cotacoesSemanaisPorFornecedor).length > 0) {
-                    // Encontrar melhor fornecedor para cotações semanais
-                    const fornecedoresSemanais = Object.keys(cotacoesSemanaisPorFornecedor).map(fornecedorNome => {
-                        const cotacoesFornecedor = cotacoesSemanaisPorFornecedor[fornecedorNome];
-                        const valorTotal = cotacoesFornecedor.reduce((acc, c) => acc + c.precoTotal, 0);
-                        const prazoMedio = Math.round(cotacoesFornecedor.reduce((acc, c) => acc + c.prazoEntrega, 0) / cotacoesFornecedor.length);
-                        
-                        return {
-                            fornecedorNome,
-                            cotacoes: cotacoesFornecedor,
-                            valorTotal,
-                            prazoMedio,
-                            quantidadeProdutos: cotacoesFornecedor.length
-                        };
-                    });
-                    
-                    fornecedoresSemanais.sort((a, b) => a.valorTotal - b.valorTotal);
-                    const melhorFornecedorSemanal = fornecedoresSemanais[0];
-                    
-                    analiseHtml += `
-                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-300">
-                            <h2 class="text-2xl font-bold text-green-800 mb-4 flex items-center gap-2">
-                                📅 Análise - Cotações Semanais
-                                <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">${cotacoesSemanaisAtivas.length} cotações</span>
-                            </h2>
-                            
-                            <div class="bg-white rounded-lg p-6 border border-green-200 mb-4">
-                                <h3 class="text-xl font-bold text-gray-800 mb-4">🏆 Melhor Opção: ${melhorFornecedorSemanal.fornecedorNome}</h3>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                    <div class="bg-green-50 rounded-lg p-4 text-center">
-                                        <p class="text-2xl font-bold text-green-600">R$ ${melhorFornecedorSemanal.valorTotal.toFixed(2)}</p>
-                                        <p class="text-sm text-gray-600">Valor Total</p>
-                                    </div>
-                                    <div class="bg-blue-50 rounded-lg p-4 text-center">
-                                        <p class="text-2xl font-bold text-blue-600">${melhorFornecedorSemanal.prazoMedio} dias</p>
-                                        <p class="text-sm text-gray-600">Prazo Médio</p>
-                                    </div>
-                                    <div class="bg-purple-50 rounded-lg p-4 text-center">
-                                        <p class="text-2xl font-bold text-purple-600">${melhorFornecedorSemanal.quantidadeProdutos}</p>
-                                        <p class="text-sm text-gray-600">Produtos</p>
-                                    </div>
-                                </div>
-                                
-                                <div class="space-y-3">
-                                    ${melhorFornecedorSemanal.cotacoes.map(cotacao => `
-                                        <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
-                                            <div>
-                                                <h5 class="font-bold text-gray-800">${cotacao.produtoNome}</h5>
-                                                <p class="text-sm text-gray-600">Qtd: ${cotacao.produto.quantidade} • R$ ${cotacao.precoUnitario.toFixed(2)}/un</p>
-                                            </div>
-                                            <div class="text-right">
-                                                <p class="font-bold text-green-600">R$ ${cotacao.precoTotal.toFixed(2)}</p>
-                                                <p class="text-sm text-gray-600">${cotacao.prazoEntrega} dias</p>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                
-                                <div class="mt-4 p-4 bg-green-100 rounded-lg">
-                                    <h5 class="font-bold text-green-800 mb-2">📋 Lista para Copiar:</h5>
-                                    <textarea id="lista-copiar-semanal" readonly class="w-full h-20 text-xs bg-white border border-green-200 rounded p-2 font-mono resize-none">${melhorFornecedorSemanal.cotacoes.map(c => `${c.produtoNome} - Qtd: ${c.produto.quantidade} - R$ ${c.precoTotal.toFixed(2)}`).join('\n')}</textarea>
-                                    <button onclick="copiarListaSemanal()" class="mt-2 w-full bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors">
-                                        📋 Copiar Lista Semanal
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                ${fornecedoresSemanais.map((fornecedor, index) => {
-                                    const ehMelhor = index === 0;
-                                    const diferenca = fornecedor.valorTotal - melhorFornecedorSemanal.valorTotal;
-                                    
-                                    return `
-                                        <div class="bg-white rounded-lg p-4 border ${ehMelhor ? 'border-green-300 bg-green-50' : 'border-gray-200'}">
-                                            <div class="flex justify-between items-center mb-3">
-                                                <h4 class="font-bold text-gray-800 flex items-center gap-2">
-                                                    ${fornecedor.fornecedorNome}
-                                                    ${ehMelhor ? '<span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">MELHOR</span>' : ''}
-                                                </h4>
-                                                <div class="text-right">
-                                                    <p class="font-bold ${ehMelhor ? 'text-green-600' : 'text-gray-700'}">R$ ${fornecedor.valorTotal.toFixed(2)}</p>
-                                                    ${!ehMelhor && diferenca > 0 ? `<p class="text-sm text-red-600">+R$ ${diferenca.toFixed(2)}</p>` : ''}
-                                                </div>
-                                            </div>
-                                            <p class="text-sm text-gray-600">${fornecedor.quantidadeProdutos} produto(s) • ${fornecedor.prazoMedio} dias médio</p>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-            
-            analiseHtml += '</div>';
-            
             container.innerHTML = analiseHtml;
             container.classList.add('fade-in');
             
-            mostrarNotificacao('Análise inteligente gerada com sucesso! 🎉', 'success');
-        }
-        
-        // Função para copiar lista semanal
-        function copiarListaSemanal() {
-            const textarea = document.getElementById('lista-copiar-semanal');
-            if (textarea) {
-                textarea.select();
-                document.execCommand('copy');
-                mostrarNotificacao('Lista semanal copiada! 📋', 'success');
-            }
+            mostrarNotificacao('Análise detalhada gerada! Veja as cotações organizadas por fornecedor.', 'success');
         }
 
         // Funções de Backup e Restauração
@@ -2260,10 +2223,10 @@
                 return;
             }
             
-            // Verificar quantos produtos já foram cotados
-            const produtosCotados = cotacaoAtual.produtos.filter(produto => 
+            // Verificar se já cotou todos os produtos
+            const jaCotouTodos = cotacaoAtual.produtos.every(produto => 
                 cotacaoAtual.cotacoes.some(c => c.produtoId === produto.id && c.fornecedorNome === fornecedorAtual.nome)
-            ).length;
+            );
             
             container.innerHTML = `
                 <div class="mb-4">
@@ -2271,16 +2234,15 @@
                     <p class="text-gray-600"><strong>Semana:</strong> ${cotacaoAtual.semana}</p>
                 </div>
                 
-                ${produtosCotados > 0 ? `
-                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+                ${jaCotouTodos ? `
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
                         <div class="text-center">
-                            <div class="text-4xl mb-3">📊</div>
-                            <h3 class="text-xl font-bold text-blue-800 mb-2">Progresso das Cotações</h3>
-                            <p class="text-blue-700">Você já enviou cotações para ${produtosCotados} de ${cotacaoAtual.produtos.length} produtos.</p>
-                            <p class="text-blue-600 text-sm mt-2">Continue cotando apenas os produtos que você tem disponível!</p>
+                            <div class="text-4xl mb-3">✅</div>
+                            <h3 class="text-xl font-bold text-green-800 mb-2">Cotação Completa!</h3>
+                            <p class="text-green-700">Você já enviou cotações para todos os produtos desta semana.</p>
                         </div>
                     </div>
-                ` : ''}
+                ` : `
                     <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200 mb-6">
                         <h3 class="text-xl font-bold text-green-800 mb-4">💰 Enviar Cotações em Lote</h3>
                         
@@ -2354,8 +2316,6 @@
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <h4 class="font-bold text-blue-800 mb-2">💡 Dicas para Fornecedores:</h4>
                     <ul class="text-blue-700 text-sm space-y-1">
-                        <li>• <strong>Não é obrigatório cotar todos os produtos!</strong></li>
-                        <li>• Preencha apenas os produtos que você tem disponível</li>
                         <li>• Compare com o preço de referência quando disponível</li>
                         <li>• Considere descontos para grandes quantidades</li>
                         <li>• Seja competitivo mas mantenha sua margem</li>
@@ -2382,7 +2342,8 @@
             if (!cotacaoAtual) return;
             
             let cotacoesEnviadas = 0;
-            let produtosIgnorados = 0;
+            let erros = 0;
+            const errosProdutos = [];
             
             cotacaoAtual.produtos.forEach(produto => {
                 // Verificar se já foi cotado
@@ -2392,9 +2353,9 @@
                 const precoInput = document.getElementById(`preco-semanal-${produto.id}`);
                 const prazoInput = document.getElementById(`prazo-semanal-${produto.id}`);
                 
-                // Se não preencheu preço, simplesmente ignora (não é obrigatório)
                 if (!precoInput.value || !prazoInput.value) {
-                    produtosIgnorados++;
+                    erros++;
+                    errosProdutos.push(produto.nome);
                     return;
                 }
                 
@@ -2418,14 +2379,14 @@
                 atualizarCotacaoSemanalFornecedor();
                 atualizarInterfaceCotacaoSemanal();
                 
-                let mensagem = `🎉 ${cotacoesEnviadas} cotação(ões) enviada(s) com sucesso!`;
-                if (produtosIgnorados > 0) {
-                    mensagem += ` (${produtosIgnorados} produto(s) não cotados - sem problema!)`;
-                }
-                mostrarNotificacao(mensagem, 'success');
-            } else if (produtosIgnorados > 0) {
-                mostrarNotificacao('Nenhuma cotação enviada. Preencha preço e prazo apenas para os produtos que você tem disponível.', 'info');
-            } else {
+                mostrarNotificacao(`🎉 ${cotacoesEnviadas} cotação(ões) enviada(s) com sucesso!`, 'success');
+            }
+            
+            if (erros > 0) {
+                mostrarNotificacao(`⚠️ ${erros} produto(s) não foram cotados: ${errosProdutos.join(', ')}. Preencha preço e prazo!`, 'error');
+            }
+            
+            if (cotacoesEnviadas === 0 && erros === 0) {
                 mostrarNotificacao('Todas as cotações já foram enviadas!', 'info');
             }
         }
@@ -3018,24 +2979,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             carregarDadosSalvos();
             
-            // Configurar eventos dos botões de login
-            const btnComprador = document.getElementById('btn-comprador');
-            const btnFornecedor = document.getElementById('btn-fornecedor');
-            
-            if (btnComprador) {
-                btnComprador.addEventListener('click', function() {
-                    console.log('Clicou no botão comprador');
-                    loginDiretoComprador();
-                });
-            }
-            
-            if (btnFornecedor) {
-                btnFornecedor.addEventListener('click', function() {
-                    console.log('Clicou no botão fornecedor');
-                    loginDiretoFornecedor();
-                });
-            }
-            
             // Carregar notificações salvas
             notificacoes = BancoDados.carregar('notificacoes', []);
             atualizarBadgeNotificacoes();
@@ -3057,5 +3000,5 @@
             }, 2000);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990b0136f7ce009f',t:'MTc2MDgyMTY0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990b0af2b1f3009f',t:'MTc2MDgyMjAzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
