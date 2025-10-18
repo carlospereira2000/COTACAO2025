@@ -104,8 +104,8 @@
                             <input type="text" id="nome-produto-comprador" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div>
-                            <label for="categoria-produto-comprador" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                            <input type="text" id="categoria-produto-comprador" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <label for="descricao-produto-comprador" class="block text-sm font-medium text-gray-700 mb-1">Descrição/Especificação</label>
+                            <input type="text" id="descricao-produto-comprador" placeholder="Ex: Marca, modelo, características..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div>
                             <label for="quantidade-necessaria-comprador" class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
@@ -126,7 +126,7 @@
                             <thead>
                                 <tr class="border-b border-gray-200">
                                     <th class="text-left py-3 px-4 font-medium text-gray-700">Produto</th>
-                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Categoria</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Descrição</th>
                                     <th class="text-left py-3 px-4 font-medium text-gray-700">Quantidade</th>
                                     <th class="text-left py-3 px-4 font-medium text-gray-700">Cotações</th>
                                     <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
@@ -252,10 +252,28 @@
             </div>
 
             <!-- Solicitações Disponíveis -->
-            <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Solicitações de Cotação Disponíveis</h2>
                 <div id="solicitacoes-disponiveis">
                     <div class="text-center py-8 text-gray-500">Nenhuma solicitação disponível no momento</div>
+                </div>
+            </div>
+
+            <!-- Formulário de Cotação Centralizado -->
+            <div id="formulario-cotacao" class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl shadow-lg p-6 border-2 border-green-200 hidden">
+                <h2 class="text-2xl font-bold text-green-800 mb-6">💰 Enviar Cotações Selecionadas</h2>
+                
+                <div id="produtos-selecionados" class="mb-6">
+                    <!-- Produtos selecionados aparecerão aqui -->
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <button onclick="limparSelecao()" class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors font-medium">
+                        🗑️ Limpar Seleção
+                    </button>
+                    <button onclick="enviarTodasCotacoes()" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium text-lg">
+                        📤 Enviar Todas as Cotações
+                    </button>
                 </div>
             </div>
         </div>
@@ -486,17 +504,18 @@
             event.preventDefault();
             
             const nome = document.getElementById('nome-produto-comprador').value;
-            const categoria = document.getElementById('categoria-produto-comprador').value;
+            const descricao = document.getElementById('descricao-produto-comprador').value;
             const quantidade = parseInt(document.getElementById('quantidade-necessaria-comprador').value);
             
             const solicitacao = {
                 id: Date.now(),
                 nome,
-                categoria,
+                descricao: descricao || 'Sem especificação',
                 quantidade,
                 status: 'Aguardando Cotações',
                 dataCriacao: new Date().toLocaleDateString('pt-BR'),
-                cotacoesRecebidas: 0
+                cotacoesRecebidas: 0,
+                prioridade: quantidade > 100 ? 'Alta' : quantidade > 50 ? 'Média' : 'Normal'
             };
             
             solicitacoes.push(solicitacao);
@@ -506,7 +525,7 @@
             atualizarInterfaceFornecedor();
             
             event.target.reset();
-            mostrarNotificacao('Solicitação criada e salva automaticamente!', 'success');
+            mostrarNotificacao('Solicitação criada com sucesso! 🎉', 'success');
         }
 
         function atualizarInterfaceComprador() {
@@ -518,11 +537,18 @@
             } else {
                 tbody.innerHTML = solicitacoes.map(solicitacao => {
                     const cotacoesProduto = cotacoes.filter(c => c.solicitacaoId === solicitacao.id);
+                    const corPrioridade = solicitacao.prioridade === 'Alta' ? 'text-red-600' : 
+                                         solicitacao.prioridade === 'Média' ? 'text-orange-600' : 'text-gray-600';
                     return `
                         <tr class="border-b border-gray-100 hover:bg-gray-50">
-                            <td class="py-3 px-4 font-medium">${solicitacao.nome}</td>
-                            <td class="py-3 px-4">${solicitacao.categoria}</td>
-                            <td class="py-3 px-4">${solicitacao.quantidade}</td>
+                            <td class="py-3 px-4">
+                                <div class="font-medium">${solicitacao.nome}</div>
+                                <div class="text-xs ${corPrioridade}">Prioridade: ${solicitacao.prioridade}</div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="text-sm text-gray-600">${solicitacao.descricao}</div>
+                            </td>
+                            <td class="py-3 px-4 font-medium">${solicitacao.quantidade}</td>
                             <td class="py-3 px-4">
                                 <span class="px-2 py-1 rounded-full text-xs font-medium ${cotacoesProduto.length > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
                                     ${cotacoesProduto.length} recebida(s)
@@ -588,19 +614,30 @@
                 html += `
                     <div class="bg-gray-50 rounded-lg p-4">
                         <h3 class="text-lg font-bold text-gray-800 mb-3">📦 ${solicitacao.nome}</h3>
-                        <p class="text-gray-600 mb-4">Quantidade: ${solicitacao.quantidade} unidades</p>
+                        <div class="mb-4 text-sm text-gray-600">
+                            <p><strong>Descrição:</strong> ${solicitacao.descricao}</p>
+                            <p><strong>Quantidade:</strong> ${solicitacao.quantidade} unidades</p>
+                            <p><strong>Prioridade:</strong> <span class="font-medium ${solicitacao.prioridade === 'Alta' ? 'text-red-600' : solicitacao.prioridade === 'Média' ? 'text-orange-600' : 'text-gray-600'}">${solicitacao.prioridade}</span></p>
+                        </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 `;
                 
-                cotacoesSolicitacao.forEach(cotacao => {
+                // Ordenar cotações por preço total
+                cotacoesSolicitacao.sort((a, b) => (a.precoUnitario * solicitacao.quantidade) - (b.precoUnitario * solicitacao.quantidade));
+                
+                cotacoesSolicitacao.forEach((cotacao, index) => {
                     const precoTotal = cotacao.precoUnitario * solicitacao.quantidade;
+                    const ehMelhor = index === 0;
                     html += `
-                        <div class="bg-white rounded-lg p-4 border border-gray-200">
-                            <h4 class="font-bold text-gray-800 mb-2">${cotacao.fornecedorNome}</h4>
+                        <div class="bg-white rounded-lg p-4 border ${ehMelhor ? 'border-green-300 bg-green-50' : 'border-gray-200'}">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-bold text-gray-800">${cotacao.fornecedorNome}</h4>
+                                ${ehMelhor ? '<span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">MELHOR</span>' : ''}
+                            </div>
                             <div class="space-y-1 text-sm">
                                 <p><span class="font-medium">Preço unitário:</span> R$ ${cotacao.precoUnitario.toFixed(2)}</p>
-                                <p><span class="font-medium">Preço total:</span> R$ ${precoTotal.toFixed(2)}</p>
+                                <p><span class="font-medium">Preço total:</span> <span class="font-bold ${ehMelhor ? 'text-green-600' : 'text-gray-800'}">R$ ${precoTotal.toFixed(2)}</span></p>
                                 <p><span class="font-medium">Prazo:</span> ${cotacao.prazoEntrega} dias</p>
                                 <p><span class="font-medium">Recebida em:</span> ${cotacao.data}</p>
                             </div>
@@ -632,83 +669,179 @@
             mostrarNotificacao('Configurações salvas automaticamente!', 'success');
         }
 
+        // Variável global para produtos selecionados
+        let produtosSelecionados = [];
+
         function atualizarInterfaceFornecedor() {
             const container = document.getElementById('solicitacoes-disponiveis');
             
             if (solicitacoes.length === 0) {
                 container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhuma solicitação disponível no momento</div>';
+                document.getElementById('formulario-cotacao').classList.add('hidden');
                 return;
             }
             
             container.innerHTML = solicitacoes.map(solicitacao => {
                 const jaCotou = cotacoes.some(c => c.solicitacaoId === solicitacao.id && c.fornecedorNome === fornecedorAtual.nome);
+                const corPrioridade = solicitacao.prioridade === 'Alta' ? 'border-red-200 bg-red-50' : 
+                                     solicitacao.prioridade === 'Média' ? 'border-orange-200 bg-orange-50' : 'border-gray-200 bg-gray-50';
                 
                 return `
-                    <div class="bg-gray-50 rounded-lg p-6 mb-4">
+                    <div class="rounded-lg p-6 mb-4 border-2 ${corPrioridade} ${jaCotou ? 'opacity-60' : ''}">
                         <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-800">${solicitacao.nome}</h3>
-                                <p class="text-gray-600">Categoria: ${solicitacao.categoria}</p>
-                                <p class="text-gray-600">Quantidade: ${solicitacao.quantidade} unidades</p>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    ${!jaCotou ? `
+                                        <input type="checkbox" id="produto-${solicitacao.id}" onchange="toggleProduto(${solicitacao.id})" 
+                                               class="w-5 h-5 text-green-600 rounded focus:ring-green-500">
+                                    ` : ''}
+                                    <h3 class="text-xl font-bold text-gray-800">${solicitacao.nome}</h3>
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium ${solicitacao.prioridade === 'Alta' ? 'bg-red-100 text-red-800' : solicitacao.prioridade === 'Média' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800'}">
+                                        ${solicitacao.prioridade}
+                                    </span>
+                                </div>
+                                <p class="text-gray-600 mb-1"><strong>Descrição:</strong> ${solicitacao.descricao}</p>
+                                <p class="text-gray-600 mb-1"><strong>Quantidade:</strong> ${solicitacao.quantidade} unidades</p>
                                 <p class="text-gray-500 text-sm">Solicitado em: ${solicitacao.dataCriacao}</p>
                             </div>
                             ${jaCotou ? 
                                 '<span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">✅ Cotação Enviada</span>' : 
-                                '<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">⏳ Aguardando Cotação</span>'
+                                '<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">⏳ Disponível para Cotação</span>'
                             }
                         </div>
                         
-                        ${!jaCotou ? `
-                            <form onsubmit="enviarCotacao(event, ${solicitacao.id})" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Preço Unitário (R$)</label>
-                                    <input type="number" name="preco" required min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prazo de Entrega (dias)</label>
-                                    <input type="number" name="prazo" required min="1" value="${fornecedorAtual.prazoEntrega}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                </div>
-                                <div class="flex items-end">
-                                    <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors font-medium">
-                                        📤 Enviar Cotação
-                                    </button>
-                                </div>
-                            </form>
-                        ` : `
+                        ${jaCotou ? `
                             <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                                <p class="text-green-800 text-sm">✅ Você já enviou uma cotação para este produto. O comprador pode visualizá-la na seção de análise.</p>
+                                <p class="text-green-800 text-sm">✅ Cotação já enviada! O comprador pode visualizá-la na análise.</p>
                             </div>
-                        `}
+                        ` : ''}
                     </div>
                 `;
             }).join('');
+            
+            atualizarFormularioCotacao();
         }
 
-        function enviarCotacao(event, solicitacaoId) {
-            event.preventDefault();
-            
-            const formData = new FormData(event.target);
-            const precoUnitario = parseFloat(formData.get('preco'));
-            const prazoEntrega = parseInt(formData.get('prazo'));
-            
+        function toggleProduto(solicitacaoId) {
+            const checkbox = document.getElementById(`produto-${solicitacaoId}`);
             const solicitacao = solicitacoes.find(s => s.id === solicitacaoId);
             
-            const cotacao = {
-                id: Date.now(),
-                solicitacaoId,
-                produtoNome: solicitacao.nome,
-                fornecedorNome: fornecedorAtual.nome,
-                precoUnitario,
-                prazoEntrega,
-                data: new Date().toLocaleDateString('pt-BR')
-            };
+            if (checkbox.checked) {
+                if (!produtosSelecionados.find(p => p.id === solicitacaoId)) {
+                    produtosSelecionados.push(solicitacao);
+                }
+            } else {
+                produtosSelecionados = produtosSelecionados.filter(p => p.id !== solicitacaoId);
+            }
             
-            cotacoes.push(cotacao);
-            BancoDados.salvar('cotacoes', cotacoes);
+            atualizarFormularioCotacao();
+        }
+
+        function atualizarFormularioCotacao() {
+            const formulario = document.getElementById('formulario-cotacao');
+            const container = document.getElementById('produtos-selecionados');
             
-            atualizarInterfaceFornecedor();
+            if (produtosSelecionados.length === 0) {
+                formulario.classList.add('hidden');
+                return;
+            }
             
-            mostrarNotificacao('Cotação enviada e salva automaticamente!', 'success');
+            formulario.classList.remove('hidden');
+            
+            container.innerHTML = `
+                <h3 class="text-lg font-bold text-gray-800 mb-4">Produtos Selecionados (${produtosSelecionados.length}):</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${produtosSelecionados.map(produto => `
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <h4 class="font-bold text-gray-800 mb-2">${produto.nome}</h4>
+                            <p class="text-sm text-gray-600 mb-3">${produto.quantidade} unidades</p>
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Preço Unit. (R$)</label>
+                                    <input type="number" id="preco-${produto.id}" required min="0" step="0.01" 
+                                           class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Prazo (dias)</label>
+                                    <input type="number" id="prazo-${produto.id}" required min="1" value="${fornecedorAtual.prazoEntrega}"
+                                           class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function limparSelecao() {
+            produtosSelecionados = [];
+            
+            // Desmarcar todos os checkboxes
+            solicitacoes.forEach(solicitacao => {
+                const checkbox = document.getElementById(`produto-${solicitacao.id}`);
+                if (checkbox) checkbox.checked = false;
+            });
+            
+            atualizarFormularioCotacao();
+            mostrarNotificacao('Seleção limpa!', 'info');
+        }
+
+        function enviarTodasCotacoes() {
+            if (produtosSelecionados.length === 0) {
+                mostrarNotificacao('Selecione pelo menos um produto!', 'error');
+                return;
+            }
+            
+            let cotacoesEnviadas = 0;
+            let erros = 0;
+            
+            produtosSelecionados.forEach(produto => {
+                const precoInput = document.getElementById(`preco-${produto.id}`);
+                const prazoInput = document.getElementById(`prazo-${produto.id}`);
+                
+                if (!precoInput.value || !prazoInput.value) {
+                    erros++;
+                    return;
+                }
+                
+                const cotacao = {
+                    id: Date.now() + Math.random(),
+                    solicitacaoId: produto.id,
+                    produtoNome: produto.nome,
+                    fornecedorNome: fornecedorAtual.nome,
+                    precoUnitario: parseFloat(precoInput.value),
+                    prazoEntrega: parseInt(prazoInput.value),
+                    data: new Date().toLocaleDateString('pt-BR')
+                };
+                
+                cotacoes.push(cotacao);
+                cotacoesEnviadas++;
+            });
+            
+            if (cotacoesEnviadas > 0) {
+                BancoDados.salvar('cotacoes', cotacoes);
+                
+                // Limpar seleção
+                produtosSelecionados = [];
+                atualizarInterfaceFornecedor();
+                
+                mostrarNotificacao(`${cotacoesEnviadas} cotação(ões) enviada(s) com sucesso! 🎉`, 'success');
+            }
+            
+            if (erros > 0) {
+                mostrarNotificacao(`${erros} produto(s) não foram cotados por falta de preço/prazo!`, 'error');
+            }
+        }
+
+        // Função para copiar lista da análise
+        function copiarLista() {
+            const textarea = document.getElementById('lista-copiar');
+            if (textarea) {
+                textarea.select();
+                document.execCommand('copy');
+                mostrarNotificacao('Lista copiada para a área de transferência! 📋', 'success');
+            }
         }
 
         // Análise Inteligente para Comprador - NOVA VERSÃO MELHORADA
@@ -851,14 +984,24 @@
             analiseHtml += `
                         </div>
                         
-                        <div class="mt-6 p-4 bg-green-100 rounded-lg">
-                            <h5 class="font-bold text-green-800 mb-2">💡 Por que esta é a melhor escolha:</h5>
-                            <ul class="text-green-700 text-sm space-y-1">
-                                <li>• Melhor custo-benefício considerando preço e prazo</li>
-                                <li>• Fornecedor com ${melhorFornecedor.quantidadeProdutos} produto(s) disponível(is)</li>
-                                <li>• Economia de tempo negociando com um único fornecedor</li>
-                                <li>• Score de ${(melhorFornecedor.scoreGeral * 100).toFixed(0)}% baseado em análise inteligente</li>
-                            </ul>
+                        <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div class="p-4 bg-green-100 rounded-lg">
+                                <h5 class="font-bold text-green-800 mb-2">💡 Por que esta é a melhor escolha:</h5>
+                                <ul class="text-green-700 text-sm space-y-1">
+                                    <li>• Melhor custo-benefício considerando preço e prazo</li>
+                                    <li>• Fornecedor com ${melhorFornecedor.quantidadeProdutos} produto(s) disponível(is)</li>
+                                    <li>• Economia de tempo negociando com um único fornecedor</li>
+                                    <li>• Score de ${(melhorFornecedor.scoreGeral * 100).toFixed(0)}% baseado em análise inteligente</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <h5 class="font-bold text-blue-800 mb-2">📋 Lista para Copiar:</h5>
+                                <textarea id="lista-copiar" readonly class="w-full h-24 text-xs bg-white border border-blue-200 rounded p-2 font-mono resize-none">${melhorFornecedor.cotacoes.map(c => `${c.produtoNome} - R$ ${c.precoTotal.toFixed(2)}`).join('\\n')}</textarea>
+                                <button onclick="copiarLista()" class="mt-2 w-full bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+                                    📋 Copiar Lista
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1079,5 +1222,5 @@
             carregarDadosSalvos();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99098e1fb662009f',t:'MTc2MDgwNjQ0MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990999e484e8009f',t:'MTc2MDgwNjkyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
