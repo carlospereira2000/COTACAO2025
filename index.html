@@ -30,6 +30,22 @@
         .login-container {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
+        .notification-badge {
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full">
@@ -51,13 +67,29 @@
                 </button>
             </div>
             
-            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h3 class="font-bold text-gray-800 mb-2">Como funciona:</h3>
-                <ul class="text-sm text-gray-600 space-y-1">
-                    <li>• <strong>Comprador:</strong> Cria produtos e analisa cotações</li>
-                    <li>• <strong>Fornecedor:</strong> Envia propostas para produtos</li>
-                    <li>• <strong>Sistema:</strong> Salva tudo automaticamente no navegador</li>
-                </ul>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                    <h3 class="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                        🛒 Comprador Premium
+                    </h3>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• Cotações semanais automáticas</li>
+                        <li>• Análise inteligente com IA</li>
+                        <li>• Comparativo de fornecedores</li>
+                        <li>• Histórico completo de compras</li>
+                    </ul>
+                </div>
+                <div class="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                    <h3 class="font-bold text-green-800 mb-2 flex items-center gap-2">
+                        🏢 Fornecedor Pro
+                    </h3>
+                    <ul class="text-sm text-green-700 space-y-1">
+                        <li>• Dashboard de oportunidades</li>
+                        <li>• Cotações em lote otimizadas</li>
+                        <li>• Alertas de novas solicitações</li>
+                        <li>• Histórico de performance</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -71,9 +103,36 @@
                     <h1 class="text-4xl font-bold text-gray-800 mb-2">Painel do Comprador</h1>
                     <p class="text-gray-600">Gerencie seus produtos e analise as melhores cotações</p>
                 </div>
-                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
-                    🚪 Sair
-                </button>
+                <div class="flex items-center gap-4">
+                    <!-- Badge de Notificações -->
+                    <div class="relative">
+                        <button onclick="toggleNotificacoes()" class="bg-blue-100 text-blue-600 p-3 rounded-full hover:bg-blue-200 transition-colors relative">
+                            🔔
+                            <span id="notification-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center notification-badge">
+                                0
+                            </span>
+                        </button>
+                        
+                        <!-- Dropdown de Notificações -->
+                        <div id="notifications-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                            <div class="p-4 border-b border-gray-200">
+                                <h3 class="font-bold text-gray-800">🔔 Notificações</h3>
+                            </div>
+                            <div id="notifications-list" class="max-h-64 overflow-y-auto">
+                                <!-- Notificações serão inseridas aqui -->
+                            </div>
+                            <div class="p-3 border-t border-gray-200 text-center">
+                                <button onclick="limparNotificacoes()" class="text-sm text-gray-600 hover:text-gray-800">
+                                    Limpar todas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                        🚪 Sair
+                    </button>
+                </div>
             </header>
 
             <!-- Navigation Tabs Comprador -->
@@ -90,6 +149,9 @@
                     </button>
                     <button onclick="showCompradorTab('analise')" id="tab-comprador-analise" class="px-4 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600 text-sm">
                         📊 Análise Inteligente
+                    </button>
+                    <button onclick="showCompradorTab('dashboard')" id="tab-comprador-dashboard" class="px-4 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600 text-sm">
+                        📊 Dashboard
                     </button>
                     <button onclick="showCompradorTab('backup')" id="tab-comprador-backup" class="px-4 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600 text-sm">
                         💾 Backup
@@ -273,6 +335,66 @@
                         🧠 Gerar Análise Inteligente
                     </button>
                     <div id="resultado-analise-comprador"></div>
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="comprador-dashboard-tab" class="tab-content-comprador hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Métricas Principais -->
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">📈 Métricas de Performance</h2>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="metricas-dashboard">
+                            <!-- Métricas serão inseridas aqui -->
+                        </div>
+                    </div>
+                    
+                    <!-- Alertas e Notificações -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">🔔 Alertas Inteligentes</h3>
+                        <div id="alertas-dashboard" class="space-y-3">
+                            <!-- Alertas serão inseridos aqui -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Gráfico de Economia -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">💰 Economia Mensal</h3>
+                        <div id="grafico-economia" class="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+                            <div class="text-center">
+                                <div class="text-4xl mb-2">📊</div>
+                                <p class="text-gray-600">Gráfico de economia será exibido aqui</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Fornecedores -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">🏆 Top Fornecedores</h3>
+                        <div id="top-fornecedores" class="space-y-3">
+                            <!-- Top fornecedores serão inseridos aqui -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Produtos Mais Cotados -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">📦 Produtos Mais Solicitados</h3>
+                        <div id="produtos-populares" class="space-y-3">
+                            <!-- Produtos populares serão inseridos aqui -->
+                        </div>
+                    </div>
+                    
+                    <!-- Tendências de Preço -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">📈 Tendências de Preço</h3>
+                        <div id="tendencias-preco" class="space-y-3">
+                            <!-- Tendências serão inseridas aqui -->
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -630,6 +752,8 @@
                 atualizarEstatisticas();
             } else if (tabName === 'cotacoes-semanais') {
                 atualizarInterfaceCotacaoSemanal();
+            } else if (tabName === 'dashboard') {
+                atualizarDashboard();
             }
         }
 
@@ -2099,10 +2223,563 @@
             }, 3000);
         }
 
+        // ===== SISTEMA DE DASHBOARD INTELIGENTE =====
+        
+        function atualizarDashboard() {
+            atualizarMetricasDashboard();
+            atualizarAlertasDashboard();
+            atualizarTopFornecedores();
+            atualizarProdutosPopulares();
+            atualizarTendenciasPreco();
+            atualizarGraficoEconomia();
+        }
+        
+        function atualizarMetricasDashboard() {
+            const container = document.getElementById('metricas-dashboard');
+            
+            // Calcular métricas
+            const totalSolicitacoes = solicitacoes.length;
+            const totalCotacoes = cotacoes.length;
+            const fornecedoresAtivos = [...new Set(cotacoes.map(c => c.fornecedorNome))].length;
+            
+            // Calcular economia média
+            let economiaTotal = 0;
+            let produtosComEconomia = 0;
+            
+            solicitacoes.forEach(solicitacao => {
+                const cotacoesProduto = cotacoes.filter(c => c.solicitacaoId === solicitacao.id);
+                if (cotacoesProduto.length > 1) {
+                    const precos = cotacoesProduto.map(c => c.precoUnitario * solicitacao.quantidade);
+                    const menorPreco = Math.min(...precos);
+                    const maiorPreco = Math.max(...precos);
+                    economiaTotal += (maiorPreco - menorPreco);
+                    produtosComEconomia++;
+                }
+            });
+            
+            const economiaMedia = produtosComEconomia > 0 ? economiaTotal / produtosComEconomia : 0;
+            
+            container.innerHTML = `
+                <div class="bg-blue-50 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-blue-600">${totalSolicitacoes}</p>
+                    <p class="text-xs text-gray-600">Solicitações</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-green-600">${totalCotacoes}</p>
+                    <p class="text-xs text-gray-600">Cotações</p>
+                </div>
+                <div class="bg-purple-50 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-purple-600">${fornecedoresAtivos}</p>
+                    <p class="text-xs text-gray-600">Fornecedores</p>
+                </div>
+                <div class="bg-orange-50 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-orange-600">R$ ${economiaMedia.toFixed(0)}</p>
+                    <p class="text-xs text-gray-600">Economia Média</p>
+                </div>
+            `;
+        }
+        
+        function atualizarAlertasDashboard() {
+            const container = document.getElementById('alertas-dashboard');
+            const alertas = [];
+            
+            // Verificar solicitações sem cotações
+            const solicitacoesSemCotacao = solicitacoes.filter(s => 
+                !cotacoes.some(c => c.solicitacaoId === s.id)
+            );
+            
+            if (solicitacoesSemCotacao.length > 0) {
+                alertas.push({
+                    tipo: 'warning',
+                    icone: '⚠️',
+                    titulo: 'Solicitações Pendentes',
+                    descricao: `${solicitacoesSemCotacao.length} produto(s) ainda sem cotações`,
+                    cor: 'bg-yellow-50 border-yellow-200 text-yellow-800'
+                });
+            }
+            
+            // Verificar cotação semanal ativa
+            if (cotacaoAtual && cotacaoAtual.status === 'ativa') {
+                const diasRestantes = Math.ceil((new Date(cotacaoAtual.dataFim) - new Date()) / (1000 * 60 * 60 * 24));
+                alertas.push({
+                    tipo: 'info',
+                    icone: '📅',
+                    titulo: 'Cotação Semanal Ativa',
+                    descricao: `${diasRestantes} dia(s) restantes`,
+                    cor: 'bg-blue-50 border-blue-200 text-blue-800'
+                });
+            }
+            
+            // Verificar oportunidades de economia
+            const oportunidades = calcularOportunidadesEconomia();
+            if (oportunidades.length > 0) {
+                alertas.push({
+                    tipo: 'success',
+                    icone: '💡',
+                    titulo: 'Oportunidade de Economia',
+                    descricao: `${oportunidades.length} produto(s) com potencial de economia`,
+                    cor: 'bg-green-50 border-green-200 text-green-800'
+                });
+            }
+            
+            if (alertas.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="text-2xl mb-2">✅</div>
+                        <p class="text-sm text-gray-600">Tudo em ordem!</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = alertas.map(alerta => `
+                    <div class="p-3 rounded-lg border ${alerta.cor}">
+                        <div class="flex items-start gap-2">
+                            <span class="text-lg">${alerta.icone}</span>
+                            <div>
+                                <p class="font-medium text-sm">${alerta.titulo}</p>
+                                <p class="text-xs opacity-80">${alerta.descricao}</p>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function calcularOportunidadesEconomia() {
+            const oportunidades = [];
+            
+            solicitacoes.forEach(solicitacao => {
+                const cotacoesProduto = cotacoes.filter(c => c.solicitacaoId === solicitacao.id);
+                if (cotacoesProduto.length > 1) {
+                    const precos = cotacoesProduto.map(c => c.precoUnitario);
+                    const menorPreco = Math.min(...precos);
+                    const maiorPreco = Math.max(...precos);
+                    const economia = ((maiorPreco - menorPreco) / maiorPreco) * 100;
+                    
+                    if (economia > 10) { // Oportunidade se economia > 10%
+                        oportunidades.push({
+                            produto: solicitacao.nome,
+                            economia: economia.toFixed(1)
+                        });
+                    }
+                }
+            });
+            
+            return oportunidades;
+        }
+        
+        function atualizarTopFornecedores() {
+            const container = document.getElementById('top-fornecedores');
+            
+            // Agrupar cotações por fornecedor
+            const fornecedorStats = {};
+            
+            cotacoes.forEach(cotacao => {
+                if (!fornecedorStats[cotacao.fornecedorNome]) {
+                    fornecedorStats[cotacao.fornecedorNome] = {
+                        nome: cotacao.fornecedorNome,
+                        totalCotacoes: 0,
+                        precoMedio: 0,
+                        prazoMedio: 0,
+                        somaPrecos: 0,
+                        somaPrazos: 0
+                    };
+                }
+                
+                const stats = fornecedorStats[cotacao.fornecedorNome];
+                stats.totalCotacoes++;
+                stats.somaPrecos += cotacao.precoUnitario;
+                stats.somaPrazos += cotacao.prazoEntrega;
+                stats.precoMedio = stats.somaPrecos / stats.totalCotacoes;
+                stats.prazoMedio = Math.round(stats.somaPrazos / stats.totalCotacoes);
+            });
+            
+            // Ordenar por número de cotações
+            const topFornecedores = Object.values(fornecedorStats)
+                .sort((a, b) => b.totalCotacoes - a.totalCotacoes)
+                .slice(0, 5);
+            
+            if (topFornecedores.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="text-2xl mb-2">🏢</div>
+                        <p class="text-sm text-gray-600">Nenhum fornecedor ainda</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = topFornecedores.map((fornecedor, index) => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full ${index === 0 ? 'bg-yellow-400' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-400' : 'bg-blue-400'} flex items-center justify-center text-white text-xs font-bold">
+                                ${index + 1}
+                            </span>
+                            <div>
+                                <p class="font-medium text-sm">${fornecedor.nome}</p>
+                                <p class="text-xs text-gray-600">${fornecedor.totalCotacoes} cotações • ${fornecedor.prazoMedio} dias</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-bold text-green-600">R$ ${fornecedor.precoMedio.toFixed(2)}</p>
+                            <p class="text-xs text-gray-500">média</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function atualizarProdutosPopulares() {
+            const container = document.getElementById('produtos-populares');
+            
+            // Contar solicitações por produto
+            const produtoCount = {};
+            
+            solicitacoes.forEach(solicitacao => {
+                const nome = solicitacao.nome.toLowerCase();
+                if (!produtoCount[nome]) {
+                    produtoCount[nome] = {
+                        nome: solicitacao.nome,
+                        count: 0,
+                        totalCotacoes: 0
+                    };
+                }
+                produtoCount[nome].count++;
+                produtoCount[nome].totalCotacoes += cotacoes.filter(c => c.solicitacaoId === solicitacao.id).length;
+            });
+            
+            const produtosPopulares = Object.values(produtoCount)
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5);
+            
+            if (produtosPopulares.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="text-2xl mb-2">📦</div>
+                        <p class="text-sm text-gray-600">Nenhum produto ainda</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = produtosPopulares.map(produto => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <p class="font-medium text-sm">${produto.nome}</p>
+                            <p class="text-xs text-gray-600">${produto.totalCotacoes} cotações recebidas</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                                ${produto.count}x
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function atualizarTendenciasPreco() {
+            const container = document.getElementById('tendencias-preco');
+            
+            // Analisar tendências de preço por produto
+            const tendencias = [];
+            
+            solicitacoes.forEach(solicitacao => {
+                const cotacoesProduto = cotacoes.filter(c => c.solicitacaoId === solicitacao.id);
+                if (cotacoesProduto.length >= 2) {
+                    const precos = cotacoesProduto.map(c => c.precoUnitario).sort((a, b) => a - b);
+                    const menorPreco = precos[0];
+                    const maiorPreco = precos[precos.length - 1];
+                    const variacao = ((maiorPreco - menorPreco) / menorPreco) * 100;
+                    
+                    tendencias.push({
+                        produto: solicitacao.nome,
+                        menorPreco,
+                        maiorPreco,
+                        variacao,
+                        numCotacoes: cotacoesProduto.length
+                    });
+                }
+            });
+            
+            // Ordenar por maior variação
+            tendencias.sort((a, b) => b.variacao - a.variacao);
+            
+            if (tendencias.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="text-2xl mb-2">📈</div>
+                        <p class="text-sm text-gray-600">Dados insuficientes</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = tendencias.slice(0, 5).map(tendencia => `
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="font-medium text-sm">${tendencia.produto}</p>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${tendencia.variacao > 20 ? 'bg-red-100 text-red-800' : tendencia.variacao > 10 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">
+                                ${tendencia.variacao.toFixed(1)}%
+                            </span>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-600">
+                            <span>R$ ${tendencia.menorPreco.toFixed(2)} - R$ ${tendencia.maiorPreco.toFixed(2)}</span>
+                            <span>${tendencia.numCotacoes} cotações</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function atualizarGraficoEconomia() {
+            const container = document.getElementById('grafico-economia');
+            
+            // Calcular economia por mês (simulado)
+            const economias = [];
+            let economiaAcumulada = 0;
+            
+            solicitacoes.forEach(solicitacao => {
+                const cotacoesProduto = cotacoes.filter(c => c.solicitacaoId === solicitacao.id);
+                if (cotacoesProduto.length > 1) {
+                    const precos = cotacoesProduto.map(c => c.precoUnitario * solicitacao.quantidade);
+                    const menorPreco = Math.min(...precos);
+                    const maiorPreco = Math.max(...precos);
+                    economiaAcumulada += (maiorPreco - menorPreco);
+                }
+            });
+            
+            container.innerHTML = `
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-green-600 mb-2">R$ ${economiaAcumulada.toFixed(2)}</div>
+                    <p class="text-lg font-medium text-gray-800 mb-2">Economia Total</p>
+                    <p class="text-sm text-gray-600">Comparando melhor vs pior cotação</p>
+                    
+                    <div class="mt-4 bg-green-100 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm text-green-700">Meta Mensal:</span>
+                            <span class="text-sm font-bold text-green-800">R$ 1.000,00</span>
+                        </div>
+                        <div class="w-full bg-green-200 rounded-full h-2">
+                            <div class="bg-green-600 h-2 rounded-full" style="width: ${Math.min((economiaAcumulada / 1000) * 100, 100)}%"></div>
+                        </div>
+                        <p class="text-xs text-green-600 mt-1">${((economiaAcumulada / 1000) * 100).toFixed(1)}% da meta</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== SISTEMA DE NOTIFICAÇÕES INTELIGENTES =====
+        
+        let notificacoes = [];
+        
+        function adicionarNotificacao(tipo, titulo, descricao, acao = null) {
+            const notificacao = {
+                id: Date.now(),
+                tipo, // 'info', 'success', 'warning', 'error'
+                titulo,
+                descricao,
+                acao,
+                timestamp: new Date().toISOString(),
+                lida: false
+            };
+            
+            notificacoes.unshift(notificacao);
+            
+            // Manter apenas as últimas 20 notificações
+            if (notificacoes.length > 20) {
+                notificacoes = notificacoes.slice(0, 20);
+            }
+            
+            BancoDados.salvar('notificacoes', notificacoes);
+            atualizarBadgeNotificacoes();
+            
+            // Mostrar notificação toast também
+            mostrarNotificacao(titulo, tipo);
+        }
+        
+        function toggleNotificacoes() {
+            const dropdown = document.getElementById('notifications-dropdown');
+            dropdown.classList.toggle('hidden');
+            
+            if (!dropdown.classList.contains('hidden')) {
+                atualizarListaNotificacoes();
+                marcarNotificacoesComoLidas();
+            }
+        }
+        
+        function atualizarBadgeNotificacoes() {
+            const badge = document.getElementById('notification-badge');
+            const naoLidas = notificacoes.filter(n => !n.lida).length;
+            
+            if (naoLidas > 0) {
+                badge.textContent = naoLidas > 99 ? '99+' : naoLidas;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+        
+        function marcarNotificacoesComoLidas() {
+            notificacoes.forEach(n => n.lida = true);
+            BancoDados.salvar('notificacoes', notificacoes);
+            atualizarBadgeNotificacoes();
+        }
+        
+        function atualizarListaNotificacoes() {
+            const container = document.getElementById('notifications-list');
+            
+            if (notificacoes.length === 0) {
+                container.innerHTML = `
+                    <div class="p-4 text-center text-gray-500">
+                        <div class="text-2xl mb-2">📭</div>
+                        <p class="text-sm">Nenhuma notificação</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const icones = {
+                info: '💙',
+                success: '✅',
+                warning: '⚠️',
+                error: '❌'
+            };
+            
+            const cores = {
+                info: 'bg-blue-50 border-blue-200',
+                success: 'bg-green-50 border-green-200',
+                warning: 'bg-yellow-50 border-yellow-200',
+                error: 'bg-red-50 border-red-200'
+            };
+            
+            container.innerHTML = notificacoes.map(notificacao => {
+                const tempo = new Date(notificacao.timestamp).toLocaleString('pt-BR');
+                return `
+                    <div class="p-3 border-b border-gray-100 hover:bg-gray-50 ${!notificacao.lida ? 'bg-blue-50' : ''}">
+                        <div class="flex items-start gap-3">
+                            <span class="text-lg">${icones[notificacao.tipo]}</span>
+                            <div class="flex-1">
+                                <p class="font-medium text-sm text-gray-800">${notificacao.titulo}</p>
+                                <p class="text-xs text-gray-600 mb-1">${notificacao.descricao}</p>
+                                <p class="text-xs text-gray-400">${tempo}</p>
+                                ${notificacao.acao ? `
+                                    <button onclick="${notificacao.acao}" class="mt-2 text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700">
+                                        Ver detalhes
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function limparNotificacoes() {
+            notificacoes = [];
+            BancoDados.salvar('notificacoes', notificacoes);
+            atualizarBadgeNotificacoes();
+            atualizarListaNotificacoes();
+        }
+        
+        // Verificar automaticamente por novas cotações
+        function verificarNovasCotacoes() {
+            const ultimaVerificacao = BancoDados.carregar('ultimaVerificacao', 0);
+            const agora = Date.now();
+            
+            // Verificar cotações recebidas nas últimas 24h
+            const cotacoesRecentes = cotacoes.filter(c => {
+                const dataCotacao = new Date(c.data.split('/').reverse().join('-')).getTime();
+                return dataCotacao > ultimaVerificacao;
+            });
+            
+            cotacoesRecentes.forEach(cotacao => {
+                const solicitacao = solicitacoes.find(s => s.id === cotacao.solicitacaoId);
+                if (solicitacao) {
+                    adicionarNotificacao(
+                        'success',
+                        'Nova Cotação Recebida!',
+                        `${cotacao.fornecedorNome} enviou cotação para ${solicitacao.nome}`,
+                        `showCompradorTab('cotacoes-recebidas')`
+                    );
+                }
+            });
+            
+            BancoDados.salvar('ultimaVerificacao', agora);
+        }
+        
+        // Verificar alertas inteligentes
+        function verificarAlertasInteligentes() {
+            // Alerta de cotação semanal expirando
+            if (cotacaoAtual && cotacaoAtual.status === 'ativa') {
+                const diasRestantes = Math.ceil((new Date(cotacaoAtual.dataFim) - new Date()) / (1000 * 60 * 60 * 24));
+                
+                if (diasRestantes <= 1 && !notificacoes.some(n => n.titulo.includes('Cotação Semanal Expirando'))) {
+                    adicionarNotificacao(
+                        'warning',
+                        'Cotação Semanal Expirando!',
+                        `Apenas ${diasRestantes} dia(s) restante(s) para receber cotações`,
+                        `showCompradorTab('cotacoes-semanais')`
+                    );
+                }
+            }
+            
+            // Alerta de produtos sem cotação há muito tempo
+            const produtosSemCotacao = solicitacoes.filter(s => {
+                const temCotacao = cotacoes.some(c => c.solicitacaoId === s.id);
+                const diasSemCotacao = Math.ceil((new Date() - new Date(s.dataCriacao.split('/').reverse().join('-'))) / (1000 * 60 * 60 * 24));
+                return !temCotacao && diasSemCotacao > 3;
+            });
+            
+            if (produtosSemCotacao.length > 0 && !notificacoes.some(n => n.titulo.includes('Produtos Sem Cotação'))) {
+                adicionarNotificacao(
+                    'warning',
+                    'Produtos Sem Cotação',
+                    `${produtosSemCotacao.length} produto(s) há mais de 3 dias sem cotações`,
+                    `showCompradorTab('produtos')`
+                );
+            }
+            
+            // Alerta de economia potencial
+            const oportunidades = calcularOportunidadesEconomia();
+            if (oportunidades.length > 0 && !notificacoes.some(n => n.titulo.includes('Oportunidade de Economia'))) {
+                const economiaTotal = oportunidades.reduce((acc, op) => acc + parseFloat(op.economia), 0);
+                adicionarNotificacao(
+                    'info',
+                    'Oportunidade de Economia Detectada!',
+                    `Potencial de ${economiaTotal.toFixed(1)}% de economia em ${oportunidades.length} produto(s)`,
+                    `showCompradorTab('analise')`
+                );
+            }
+        }
+        
+        // Fechar dropdown ao clicar fora
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('notifications-dropdown');
+            const button = event.target.closest('button[onclick="toggleNotificacoes()"]');
+            
+            if (!button && !dropdown?.contains(event.target)) {
+                dropdown?.classList.add('hidden');
+            }
+        });
+
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             carregarDadosSalvos();
+            
+            // Carregar notificações salvas
+            notificacoes = BancoDados.carregar('notificacoes', []);
+            atualizarBadgeNotificacoes();
+            
+            // Verificar alertas a cada 30 segundos
+            setInterval(() => {
+                if (tipoUsuario === 'comprador') {
+                    verificarNovasCotacoes();
+                    verificarAlertasInteligentes();
+                }
+            }, 30000);
+            
+            // Verificação inicial
+            setTimeout(() => {
+                if (tipoUsuario === 'comprador') {
+                    verificarNovasCotacoes();
+                    verificarAlertasInteligentes();
+                }
+            }, 2000);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9909e47ff300009f',t:'MTc2MDgwOTk3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990a828154ea009f',t:'MTc2MDgxNjQ1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
