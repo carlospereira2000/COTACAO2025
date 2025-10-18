@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cotação Colaborativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse-green {
+            animation: pulseGreen 2s infinite;
+        }
+        @keyframes pulseGreen {
+            0%, 100% { background-color: rgb(34, 197, 94); }
+            50% { background-color: rgb(22, 163, 74); }
+        }
+        .best-option {
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+            border: 2px solid rgb(34, 197, 94);
+        }
+        .login-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-full">
+    <!-- Tela de Login -->
+    <div id="login-screen" class="login-container min-h-full flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Sistema de Cotação</h1>
+                <p class="text-gray-600">Colaborativo e Inteligente</p>
+                <div class="mt-2 text-xs text-green-600 font-medium">💾 Dados salvos automaticamente</div>
+            </div>
+            
+            <div class="space-y-4">
+                <button onclick="fazerLogin('comprador')" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center">
+                    🛒 Entrar como Comprador
+                </button>
+                <button onclick="fazerLogin('fornecedor')" class="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center">
+                    🏢 Entrar como Fornecedor
+                </button>
+            </div>
+            
+            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-bold text-gray-800 mb-2">Como funciona:</h3>
+                <ul class="text-sm text-gray-600 space-y-1">
+                    <li>• <strong>Comprador:</strong> Cria produtos e analisa cotações</li>
+                    <li>• <strong>Fornecedor:</strong> Envia propostas para produtos</li>
+                    <li>• <strong>Sistema:</strong> Salva tudo automaticamente no navegador</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interface do Comprador -->
+    <div id="comprador-interface" class="hidden">
+        <div class="container mx-auto px-4 py-6">
+            <!-- Header Comprador -->
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-800 mb-2">Painel do Comprador</h1>
+                    <p class="text-gray-600">Gerencie seus produtos e analise as melhores cotações</p>
+                </div>
+                <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                    🚪 Sair
+                </button>
+            </header>
+
+            <!-- Navigation Tabs Comprador -->
+            <nav class="flex justify-center mb-8">
+                <div class="bg-white rounded-lg shadow-md p-1">
+                    <button onclick="showCompradorTab('produtos')" id="tab-comprador-produtos" class="px-6 py-3 rounded-md font-medium transition-all bg-blue-600 text-white">
+                        📦 Meus Produtos
+                    </button>
+                    <button onclick="showCompradorTab('cotacoes-recebidas')" id="tab-comprador-cotacoes-recebidas" class="px-6 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600">
+                        📨 Cotações Recebidas
+                    </button>
+                    <button onclick="showCompradorTab('analise')" id="tab-comprador-analise" class="px-6 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600">
+                        📊 Análise Inteligente
+                    </button>
+                    <button onclick="showCompradorTab('backup')" id="tab-comprador-backup" class="px-6 py-3 rounded-md font-medium transition-all text-gray-600 hover:text-blue-600">
+                        💾 Backup
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Produtos Tab Comprador -->
+            <div id="comprador-produtos-tab" class="tab-content-comprador">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Criar Solicitação de Cotação</h2>
+                    <form onsubmit="criarSolicitacao(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label for="nome-produto-comprador" class="block text-sm font-medium text-gray-700 mb-1">Nome do Produto</label>
+                            <input type="text" id="nome-produto-comprador" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="categoria-produto-comprador" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                            <input type="text" id="categoria-produto-comprador" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="quantidade-necessaria-comprador" class="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                            <input type="number" id="quantidade-necessaria-comprador" required min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                                📤 Solicitar Cotações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Minhas Solicitações</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Produto</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Categoria</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Quantidade</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Cotações</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Status</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-700">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-solicitacoes-comprador">
+                                <tr>
+                                    <td colspan="6" class="text-center py-8 text-gray-500">Nenhuma solicitação criada ainda</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cotações Recebidas Tab -->
+            <div id="comprador-cotacoes-recebidas-tab" class="tab-content-comprador hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Cotações Recebidas dos Fornecedores</h2>
+                    <div id="cotacoes-recebidas-lista">
+                        <div class="text-center py-8 text-gray-500">Nenhuma cotação recebida ainda</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Análise Tab Comprador -->
+            <div id="comprador-analise-tab" class="tab-content-comprador hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Análise Inteligente de Compras</h2>
+                    <button onclick="gerarAnaliseComprador()" class="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors font-medium mb-6">
+                        🧠 Gerar Análise Inteligente
+                    </button>
+                    <div id="resultado-analise-comprador"></div>
+                </div>
+            </div>
+
+            <!-- Backup Tab -->
+            <div id="comprador-backup-tab" class="tab-content-comprador hidden">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Gerenciamento de Dados</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Backup -->
+                        <div class="bg-green-50 rounded-lg p-6 border border-green-200">
+                            <h3 class="text-lg font-bold text-green-800 mb-4">💾 Backup dos Dados</h3>
+                            <p class="text-green-700 text-sm mb-4">Exporte todos os dados para um arquivo de backup seguro.</p>
+                            <button onclick="exportarDados()" class="w-full bg-green-600 text-white px-4 py-3 rounded-md hover:bg-green-700 transition-colors font-medium">
+                                📥 Baixar Backup
+                            </button>
+                        </div>
+
+                        <!-- Restaurar -->
+                        <div class="bg-blue-50 rounded-lg p-6 border border-blue-200">
+                            <h3 class="text-lg font-bold text-blue-800 mb-4">📂 Restaurar Dados</h3>
+                            <p class="text-blue-700 text-sm mb-4">Importe dados de um arquivo de backup anterior.</p>
+                            <input type="file" id="arquivo-backup" accept=".json" class="w-full mb-3 text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <button onclick="importarDados()" class="w-full bg-blue-600 text-white px-4 py-3 rounded-md hover:bg-blue-700 transition-colors font-medium">
+                                📤 Restaurar Backup
+                            </button>
+                        </div>
+
+                        <!-- Estatísticas -->
+                        <div class="bg-purple-50 rounded-lg p-6 border border-purple-200">
+                            <h3 class="text-lg font-bold text-purple-800 mb-4">📊 Estatísticas</h3>
+                            <div id="estatisticas-dados" class="space-y-2 text-sm text-purple-700">
+                                <p>Carregando estatísticas...</p>
+                            </div>
+                        </div>
+
+                        <!-- Limpar Dados -->
+                        <div class="bg-red-50 rounded-lg p-6 border border-red-200">
+                            <h3 class="text-lg font-bold text-red-800 mb-4">🗑️ Limpar Sistema</h3>
+                            <p class="text-red-700 text-sm mb-4">⚠️ Esta ação remove TODOS os dados permanentemente!</p>
+                            <button onclick="limparTodosDados()" class="w-full bg-red-600 text-white px-4 py-3 rounded-md hover:bg-red-700 transition-colors font-medium">
+                                🗑️ Limpar Tudo
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interface do Fornecedor -->
+    <div id="fornecedor-interface" class="hidden">
+        <div class="container mx-auto px-4 py-6">
+            <!-- Header Fornecedor -->
+            <header class="flex justify-between items-center mb-8">
+                <div>
+                    <h1 class="text-4xl font-bold text-gray-800 mb-2">Painel do Fornecedor</h1>
+                    <p class="text-gray-600">Envie suas melhores propostas para os compradores</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600">Logado como:</p>
+                        <p class="font-bold text-gray-800" id="nome-fornecedor-logado">Fornecedor Exemplo</p>
+                    </div>
+                    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors">
+                        🚪 Sair
+                    </button>
+                </div>
+            </header>
+
+            <!-- Configuração do Fornecedor -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Meus Dados</h2>
+                <form onsubmit="configurarFornecedor(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="nome-empresa" class="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa</label>
+                        <input type="text" id="nome-empresa" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label for="prazo-padrao" class="block text-sm font-medium text-gray-700 mb-1">Prazo Padrão de Entrega (dias)</label>
+                        <input type="number" id="prazo-padrao" required min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors font-medium">
+                            💾 Salvar Configurações
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Solicitações Disponíveis -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Solicitações de Cotação Disponíveis</h2>
+                <div id="solicitacoes-disponiveis">
+                    <div class="text-center py-8 text-gray-500">Nenhuma solicitação disponível no momento</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sistema de Banco de Dados Local (LocalStorage)
+        class BancoDados {
+            static salvar(chave, dados) {
+                try {
+                    localStorage.setItem(`cotacao_${chave}`, JSON.stringify(dados));
+                    localStorage.setItem(`cotacao_${chave}_timestamp`, new Date().toISOString());
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao salvar dados:', error);
+                    mostrarNotificacao('Erro ao salvar dados!', 'error');
+                    return false;
+                }
+            }
+
+            static carregar(chave, padrao = []) {
+                try {
+                    const dados = localStorage.getItem(`cotacao_${chave}`);
+                    return dados ? JSON.parse(dados) : padrao;
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                    return padrao;
+                }
+            }
+
+            static limpar(chave) {
+                try {
+                    localStorage.removeItem(`cotacao_${chave}`);
+                    localStorage.removeItem(`cotacao_${chave}_timestamp`);
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao limpar dados:', error);
+                    return false;
+                }
+            }
+
+            static limparTudo() {
+                try {
+                    const chaves = ['solicitacoes', 'cotacoes', 'fornecedorAtual'];
+                    chaves.forEach(chave => {
+                        localStorage.removeItem(`cotacao_${chave}`);
+                        localStorage.removeItem(`cotacao_${chave}_timestamp`);
+                    });
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao limpar todos os dados:', error);
+                    return false;
+                }
+            }
+
+            static exportarDados() {
+                const dados = {
+                    solicitacoes: BancoDados.carregar('solicitacoes'),
+                    cotacoes: BancoDados.carregar('cotacoes'),
+                    fornecedorAtual: BancoDados.carregar('fornecedorAtual'),
+                    dataExportacao: new Date().toISOString(),
+                    versao: '1.0'
+                };
+                return JSON.stringify(dados, null, 2);
+            }
+
+            static importarDados(dadosJson) {
+                try {
+                    const dados = JSON.parse(dadosJson);
+                    
+                    if (!dados.versao) {
+                        throw new Error('Arquivo de backup inválido');
+                    }
+                    
+                    if (dados.solicitacoes) BancoDados.salvar('solicitacoes', dados.solicitacoes);
+                    if (dados.cotacoes) BancoDados.salvar('cotacoes', dados.cotacoes);
+                    if (dados.fornecedorAtual) BancoDados.salvar('fornecedorAtual', dados.fornecedorAtual);
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao importar dados:', error);
+                    return false;
+                }
+            }
+
+            static obterEstatisticas() {
+                const solicitacoes = BancoDados.carregar('solicitacoes');
+                const cotacoes = BancoDados.carregar('cotacoes');
+                
+                return {
+                    totalSolicitacoes: solicitacoes.length,
+                    totalCotacoes: cotacoes.length,
+                    fornecedoresUnicos: [...new Set(cotacoes.map(c => c.fornecedorNome))].length,
+                    ultimaAtualizacao: localStorage.getItem('cotacao_solicitacoes_timestamp') || 'Nunca'
+                };
+            }
+        }
+
+        // Dados globais
+        let usuarioAtual = null;
+        let tipoUsuario = null;
+        let solicitacoes = [];
+        let cotacoes = [];
+        let fornecedorAtual = {
+            nome: 'Fornecedor Exemplo',
+            prazoEntrega: 7
+        };
+
+        // Carregar dados salvos ao iniciar
+        function carregarDadosSalvos() {
+            solicitacoes = BancoDados.carregar('solicitacoes', []);
+            cotacoes = BancoDados.carregar('cotacoes', []);
+            
+            const fornecedorSalvo = BancoDados.carregar('fornecedorAtual', null);
+            if (fornecedorSalvo) {
+                fornecedorAtual = fornecedorSalvo;
+            }
+            
+            atualizarEstatisticas();
+        }
+
+        // Sistema de Login
+        function fazerLogin(tipo) {
+            if (tipo === 'comprador') {
+                // Mostrar formulário de login para comprador
+                document.getElementById('login-screen').innerHTML = `
+                    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+                        <div class="text-center mb-8">
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">Login Comprador</h1>
+                            <p class="text-gray-600">Digite suas credenciais</p>
+                        </div>
+                        
+                        <form onsubmit="loginComprador(event)" class="space-y-4">
+                            <div>
+                                <label for="login-usuario" class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
+                                <input type="text" id="login-usuario" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label for="login-senha" class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                                <input type="password" id="login-senha" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                🔐 Entrar
+                            </button>
+                        </form>
+                        
+                        <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <p class="text-xs text-blue-700 text-center">
+                                <strong>Credenciais:</strong> eduardo / 190700
+                            </p>
+                        </div>
+                        
+                        <button onclick="voltarTelaLogin()" class="w-full mt-4 text-gray-600 hover:text-gray-800 text-sm">
+                            ← Voltar
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Login direto para fornecedor
+            tipoUsuario = tipo;
+            usuarioAtual = 'Fornecedor Exemplo';
+            
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('fornecedor-interface').classList.remove('hidden');
+            document.getElementById('nome-fornecedor-logado').textContent = fornecedorAtual.nome;
+            document.getElementById('nome-empresa').value = fornecedorAtual.nome;
+            document.getElementById('prazo-padrao').value = fornecedorAtual.prazoEntrega;
+            atualizarInterfaceFornecedor();
+            
+            mostrarNotificacao(`Bem-vindo, ${usuarioAtual}!`, 'success');
+        }
+        
+        function voltarTelaLogin() {
+            location.reload();
+        }
+        
+        function loginComprador(event) {
+            event.preventDefault();
+            
+            const usuario = document.getElementById('login-usuario').value;
+            const senha = document.getElementById('login-senha').value;
+            
+            if (usuario === 'eduardo' && senha === '190700') {
+                tipoUsuario = 'comprador';
+                usuarioAtual = 'Eduardo - Comprador';
+                
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('comprador-interface').classList.remove('hidden');
+                atualizarInterfaceComprador();
+                atualizarEstatisticas();
+                
+                mostrarNotificacao(`Bem-vindo, ${usuarioAtual}!`, 'success');
+            } else {
+                mostrarNotificacao('Usuário ou senha incorretos!', 'error');
+            }
+        }
+
+        function logout() {
+            usuarioAtual = null;
+            tipoUsuario = null;
+            
+            document.getElementById('comprador-interface').classList.add('hidden');
+            document.getElementById('fornecedor-interface').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            
+            mostrarNotificacao('Logout realizado com sucesso!', 'info');
+            location.reload();
+        }
+
+        // Navegação Comprador
+        function showCompradorTab(tabName) {
+            document.querySelectorAll('.tab-content-comprador').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            document.querySelectorAll('#comprador-interface nav button').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white');
+                btn.classList.add('text-gray-600');
+            });
+            
+            document.getElementById('comprador-' + tabName + '-tab').classList.remove('hidden');
+            document.getElementById('tab-comprador-' + tabName).classList.add('bg-blue-600', 'text-white');
+            document.getElementById('tab-comprador-' + tabName).classList.remove('text-gray-600');
+            
+            if (tabName === 'backup') {
+                atualizarEstatisticas();
+            }
+        }
+
+        // Funções do Comprador
+        function criarSolicitacao(event) {
+            event.preventDefault();
+            
+            const nome = document.getElementById('nome-produto-comprador').value;
+            const categoria = document.getElementById('categoria-produto-comprador').value;
+            const quantidade = parseInt(document.getElementById('quantidade-necessaria-comprador').value);
+            
+            const solicitacao = {
+                id: Date.now(),
+                nome,
+                categoria,
+                quantidade,
+                status: 'Aguardando Cotações',
+                dataCriacao: new Date().toLocaleDateString('pt-BR'),
+                cotacoesRecebidas: 0
+            };
+            
+            solicitacoes.push(solicitacao);
+            BancoDados.salvar('solicitacoes', solicitacoes);
+            
+            atualizarInterfaceComprador();
+            atualizarInterfaceFornecedor();
+            
+            event.target.reset();
+            mostrarNotificacao('Solicitação criada e salva automaticamente!', 'success');
+        }
+
+        function atualizarInterfaceComprador() {
+            // Atualizar lista de solicitações
+            const tbody = document.getElementById('lista-solicitacoes-comprador');
+            
+            if (solicitacoes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-gray-500">Nenhuma solicitação criada ainda</td></tr>';
+            } else {
+                tbody.innerHTML = solicitacoes.map(solicitacao => {
+                    const cotacoesProduto = cotacoes.filter(c => c.solicitacaoId === solicitacao.id);
+                    return `
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-3 px-4 font-medium">${solicitacao.nome}</td>
+                            <td class="py-3 px-4">${solicitacao.categoria}</td>
+                            <td class="py-3 px-4">${solicitacao.quantidade}</td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium ${cotacoesProduto.length > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                    ${cotacoesProduto.length} recebida(s)
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium ${cotacoesProduto.length > 0 ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}">
+                                    ${cotacoesProduto.length > 0 ? 'Com Cotações' : 'Aguardando'}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <button onclick="excluirSolicitacao(${solicitacao.id})" class="text-red-600 hover:text-red-800 font-medium text-sm">
+                                    🗑️ Excluir
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            // Atualizar cotações recebidas
+            atualizarCotacoesRecebidas();
+        }
+
+        function excluirSolicitacao(id) {
+            // Remover cotações relacionadas
+            cotacoes = cotacoes.filter(c => c.solicitacaoId !== id);
+            BancoDados.salvar('cotacoes', cotacoes);
+            
+            // Remover solicitação
+            solicitacoes = solicitacoes.filter(s => s.id !== id);
+            BancoDados.salvar('solicitacoes', solicitacoes);
+            
+            atualizarInterfaceComprador();
+            atualizarInterfaceFornecedor();
+            
+            mostrarNotificacao('Solicitação excluída e dados salvos!', 'info');
+        }
+
+        function atualizarCotacoesRecebidas() {
+            const container = document.getElementById('cotacoes-recebidas-lista');
+            
+            if (cotacoes.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhuma cotação recebida ainda</div>';
+                return;
+            }
+            
+            // Agrupar cotações por solicitação
+            const cotacoesPorSolicitacao = {};
+            cotacoes.forEach(cotacao => {
+                if (!cotacoesPorSolicitacao[cotacao.solicitacaoId]) {
+                    cotacoesPorSolicitacao[cotacao.solicitacaoId] = [];
+                }
+                cotacoesPorSolicitacao[cotacao.solicitacaoId].push(cotacao);
+            });
+            
+            let html = '<div class="space-y-6">';
+            
+            Object.keys(cotacoesPorSolicitacao).forEach(solicitacaoId => {
+                const solicitacao = solicitacoes.find(s => s.id == solicitacaoId);
+                const cotacoesSolicitacao = cotacoesPorSolicitacao[solicitacaoId];
+                
+                html += `
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <h3 class="text-lg font-bold text-gray-800 mb-3">📦 ${solicitacao.nome}</h3>
+                        <p class="text-gray-600 mb-4">Quantidade: ${solicitacao.quantidade} unidades</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                `;
+                
+                cotacoesSolicitacao.forEach(cotacao => {
+                    const precoTotal = cotacao.precoUnitario * solicitacao.quantidade;
+                    html += `
+                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                            <h4 class="font-bold text-gray-800 mb-2">${cotacao.fornecedorNome}</h4>
+                            <div class="space-y-1 text-sm">
+                                <p><span class="font-medium">Preço unitário:</span> R$ ${cotacao.precoUnitario.toFixed(2)}</p>
+                                <p><span class="font-medium">Preço total:</span> R$ ${precoTotal.toFixed(2)}</p>
+                                <p><span class="font-medium">Prazo:</span> ${cotacao.prazoEntrega} dias</p>
+                                <p><span class="font-medium">Recebida em:</span> ${cotacao.data}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Funções do Fornecedor
+        function configurarFornecedor(event) {
+            event.preventDefault();
+            
+            fornecedorAtual.nome = document.getElementById('nome-empresa').value;
+            fornecedorAtual.prazoEntrega = parseInt(document.getElementById('prazo-padrao').value);
+            
+            BancoDados.salvar('fornecedorAtual', fornecedorAtual);
+            
+            document.getElementById('nome-fornecedor-logado').textContent = fornecedorAtual.nome;
+            
+            mostrarNotificacao('Configurações salvas automaticamente!', 'success');
+        }
+
+        function atualizarInterfaceFornecedor() {
+            const container = document.getElementById('solicitacoes-disponiveis');
+            
+            if (solicitacoes.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhuma solicitação disponível no momento</div>';
+                return;
+            }
+            
+            container.innerHTML = solicitacoes.map(solicitacao => {
+                const jaCotou = cotacoes.some(c => c.solicitacaoId === solicitacao.id && c.fornecedorNome === fornecedorAtual.nome);
+                
+                return `
+                    <div class="bg-gray-50 rounded-lg p-6 mb-4">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">${solicitacao.nome}</h3>
+                                <p class="text-gray-600">Categoria: ${solicitacao.categoria}</p>
+                                <p class="text-gray-600">Quantidade: ${solicitacao.quantidade} unidades</p>
+                                <p class="text-gray-500 text-sm">Solicitado em: ${solicitacao.dataCriacao}</p>
+                            </div>
+                            ${jaCotou ? 
+                                '<span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">✅ Cotação Enviada</span>' : 
+                                '<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">⏳ Aguardando Cotação</span>'
+                            }
+                        </div>
+                        
+                        ${!jaCotou ? `
+                            <form onsubmit="enviarCotacao(event, ${solicitacao.id})" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Preço Unitário (R$)</label>
+                                    <input type="number" name="preco" required min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Prazo de Entrega (dias)</label>
+                                    <input type="number" name="prazo" required min="1" value="${fornecedorAtual.prazoEntrega}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                </div>
+                                <div class="flex items-end">
+                                    <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors font-medium">
+                                        📤 Enviar Cotação
+                                    </button>
+                                </div>
+                            </form>
+                        ` : `
+                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <p class="text-green-800 text-sm">✅ Você já enviou uma cotação para este produto. O comprador pode visualizá-la na seção de análise.</p>
+                            </div>
+                        `}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function enviarCotacao(event, solicitacaoId) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const precoUnitario = parseFloat(formData.get('preco'));
+            const prazoEntrega = parseInt(formData.get('prazo'));
+            
+            const solicitacao = solicitacoes.find(s => s.id === solicitacaoId);
+            
+            const cotacao = {
+                id: Date.now(),
+                solicitacaoId,
+                produtoNome: solicitacao.nome,
+                fornecedorNome: fornecedorAtual.nome,
+                precoUnitario,
+                prazoEntrega,
+                data: new Date().toLocaleDateString('pt-BR')
+            };
+            
+            cotacoes.push(cotacao);
+            BancoDados.salvar('cotacoes', cotacoes);
+            
+            atualizarInterfaceFornecedor();
+            
+            mostrarNotificacao('Cotação enviada e salva automaticamente!', 'success');
+        }
+
+        // Análise Inteligente para Comprador
+        function gerarAnaliseComprador() {
+            const container = document.getElementById('resultado-analise-comprador');
+            
+            if (solicitacoes.length === 0 || cotacoes.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <p class="text-yellow-800">⚠️ Para gerar a análise, você precisa ter solicitações criadas e cotações recebidas.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Encontrar melhor cotação para cada produto
+            const melhoresCotacoes = [];
+            
+            solicitacoes.forEach(solicitacao => {
+                const cotacoesProduto = cotacoes.filter(c => c.solicitacaoId === solicitacao.id);
+                
+                if (cotacoesProduto.length === 0) return;
+                
+                // Calcular scores para cada cotação do produto
+                const cotacoesComScore = cotacoesProduto.map(cotacao => {
+                    const precoTotal = cotacao.precoUnitario * solicitacao.quantidade;
+                    
+                    const precoMin = Math.min(...cotacoesProduto.map(c => c.precoUnitario * solicitacao.quantidade));
+                    const precoMax = Math.max(...cotacoesProduto.map(c => c.precoUnitario * solicitacao.quantidade));
+                    const prazoMin = Math.min(...cotacoesProduto.map(c => c.prazoEntrega));
+                    const prazoMax = Math.max(...cotacoesProduto.map(c => c.prazoEntrega));
+                    
+                    const scorePreco = precoMax === precoMin ? 1 : (precoMax - precoTotal) / (precoMax - precoMin);
+                    const scorePrazo = prazoMax === prazoMin ? 1 : (prazoMax - cotacao.prazoEntrega) / (prazoMax - prazoMin);
+                    const scoreTotal = (scorePreco * 0.7) + (scorePrazo * 0.3);
+                    
+                    return {
+                        ...cotacao,
+                        solicitacao,
+                        precoTotal,
+                        scoreTotal
+                    };
+                });
+                
+                // Pegar a melhor cotação para este produto
+                cotacoesComScore.sort((a, b) => b.scoreTotal - a.scoreTotal);
+                melhoresCotacoes.push(cotacoesComScore[0]);
+            });
+            
+            // Agrupar por fornecedor
+            const cotacoesPorFornecedor = {};
+            melhoresCotacoes.forEach(cotacao => {
+                if (!cotacoesPorFornecedor[cotacao.fornecedorNome]) {
+                    cotacoesPorFornecedor[cotacao.fornecedorNome] = [];
+                }
+                cotacoesPorFornecedor[cotacao.fornecedorNome].push(cotacao);
+            });
+            
+            // Calcular score geral por fornecedor
+            const fornecedoresComScore = Object.keys(cotacoesPorFornecedor).map(fornecedorNome => {
+                const cotacoesFornecedor = cotacoesPorFornecedor[fornecedorNome];
+                const scoreGeral = cotacoesFornecedor.reduce((acc, cotacao) => acc + cotacao.scoreTotal, 0) / cotacoesFornecedor.length;
+                const valorTotal = cotacoesFornecedor.reduce((acc, cotacao) => acc + cotacao.precoTotal, 0);
+                const prazoMedio = Math.round(cotacoesFornecedor.reduce((acc, cotacao) => acc + cotacao.prazoEntrega, 0) / cotacoesFornecedor.length);
+                
+                return {
+                    fornecedorNome,
+                    cotacoes: cotacoesFornecedor,
+                    scoreGeral,
+                    valorTotal,
+                    prazoMedio,
+                    quantidadeProdutos: cotacoesFornecedor.length
+                };
+            });
+            
+            // Ordenar fornecedores por score
+            fornecedoresComScore.sort((a, b) => b.scoreGeral - a.scoreGeral);
+            const melhorFornecedor = fornecedoresComScore[0];
+            
+            let analiseHtml = `
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-300 mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl font-bold text-green-800">🏆 MELHOR FORNECEDOR RECOMENDADO</h2>
+                        <span class="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold pulse-green">ESCOLHA INTELIGENTE</span>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 border border-green-200">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">${melhorFornecedor.fornecedorNome}</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-green-50 rounded-lg p-4 text-center">
+                                <p class="text-2xl font-bold text-green-600">R$ ${melhorFornecedor.valorTotal.toFixed(2)}</p>
+                                <p class="text-sm text-gray-600">Valor Total</p>
+                            </div>
+                            <div class="bg-blue-50 rounded-lg p-4 text-center">
+                                <p class="text-2xl font-bold text-blue-600">${melhorFornecedor.prazoMedio} dias</p>
+                                <p class="text-sm text-gray-600">Prazo Médio</p>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-4 text-center">
+                                <p class="text-2xl font-bold text-purple-600">${(melhorFornecedor.scoreGeral * 100).toFixed(0)}%</p>
+                                <p class="text-sm text-gray-600">Score Geral</p>
+                            </div>
+                        </div>
+                        
+                        <h4 class="text-lg font-bold text-gray-800 mb-3">📋 Lista de Compras Recomendada:</h4>
+                        <div class="space-y-3">
+            `;
+            
+            melhorFornecedor.cotacoes.forEach(cotacao => {
+                analiseHtml += `
+                    <div class="bg-gray-50 rounded-lg p-4 flex justify-between items-center">
+                        <div>
+                            <h5 class="font-bold text-gray-800">${cotacao.produtoNome}</h5>
+                            <p class="text-sm text-gray-600">Quantidade: ${cotacao.solicitacao.quantidade} unidades</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-green-600">R$ ${cotacao.precoTotal.toFixed(2)}</p>
+                            <p class="text-sm text-gray-600">${cotacao.prazoEntrega} dias</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            analiseHtml += `
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-green-100 rounded-lg">
+                            <h5 class="font-bold text-green-800 mb-2">💡 Por que esta é a melhor escolha:</h5>
+                            <ul class="text-green-700 text-sm space-y-1">
+                                <li>• Melhor custo-benefício considerando preço e prazo</li>
+                                <li>• Fornecedor com ${melhorFornecedor.quantidadeProdutos} produto(s) disponível(is)</li>
+                                <li>• Economia de tempo negociando com um único fornecedor</li>
+                                <li>• Score de ${(melhorFornecedor.scoreGeral * 100).toFixed(0)}% baseado em análise inteligente</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Mostrar comparativo com outros fornecedores se houver
+            if (fornecedoresComScore.length > 1) {
+                analiseHtml += `
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">📊 Comparativo com Outros Fornecedores</h3>
+                        <div class="space-y-3">
+                `;
+                
+                fornecedoresComScore.slice(1).forEach((fornecedor, index) => {
+                    const diferenca = melhorFornecedor.valorTotal - fornecedor.valorTotal;
+                    const diferencaTexto = diferenca > 0 ? `R$ ${diferenca.toFixed(2)} mais caro` : `R$ ${Math.abs(diferenca).toFixed(2)} mais barato`;
+                    
+                    analiseHtml += `
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-bold text-gray-800">${fornecedor.fornecedorNome}</h4>
+                                    <p class="text-sm text-gray-600">${fornecedor.quantidadeProdutos} produto(s) • ${fornecedor.prazoMedio} dias médio</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold text-gray-700">R$ ${fornecedor.valorTotal.toFixed(2)}</p>
+                                    <p class="text-sm ${diferenca > 0 ? 'text-red-600' : 'text-green-600'}">${diferencaTexto}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                analiseHtml += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = analiseHtml;
+            container.classList.add('fade-in');
+            
+            mostrarNotificacao('Análise consolidada gerada! Melhor fornecedor identificado.', 'success');
+        }
+
+        // Funções de Backup e Restauração
+        function exportarDados() {
+            try {
+                const dados = BancoDados.exportarDados();
+                const blob = new Blob([dados], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup-cotacoes-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                mostrarNotificacao('Backup baixado com sucesso!', 'success');
+            } catch (error) {
+                mostrarNotificacao('Erro ao gerar backup!', 'error');
+            }
+        }
+
+        function importarDados() {
+            const arquivo = document.getElementById('arquivo-backup').files[0];
+            
+            if (!arquivo) {
+                mostrarNotificacao('Selecione um arquivo de backup primeiro!', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const sucesso = BancoDados.importarDados(e.target.result);
+                    
+                    if (sucesso) {
+                        carregarDadosSalvos();
+                        atualizarInterfaceComprador();
+                        atualizarInterfaceFornecedor();
+                        atualizarEstatisticas();
+                        mostrarNotificacao('Dados restaurados com sucesso!', 'success');
+                    } else {
+                        mostrarNotificacao('Erro ao restaurar dados! Verifique o arquivo.', 'error');
+                    }
+                } catch (error) {
+                    mostrarNotificacao('Arquivo de backup inválido!', 'error');
+                }
+            };
+            
+            reader.readAsText(arquivo);
+        }
+
+        function limparTodosDados() {
+            if (confirm('⚠️ ATENÇÃO: Esta ação irá remover TODOS os dados permanentemente!\n\nTem certeza que deseja continuar?')) {
+                BancoDados.limparTudo();
+                
+                solicitacoes = [];
+                cotacoes = [];
+                fornecedorAtual = {
+                    nome: 'Fornecedor Exemplo',
+                    prazoEntrega: 7
+                };
+                
+                atualizarInterfaceComprador();
+                atualizarInterfaceFornecedor();
+                atualizarEstatisticas();
+                
+                mostrarNotificacao('Todos os dados foram removidos!', 'info');
+            }
+        }
+
+        function atualizarEstatisticas() {
+            const stats = BancoDados.obterEstatisticas();
+            const container = document.getElementById('estatisticas-dados');
+            
+            if (container) {
+                const ultimaAtualizacao = stats.ultimaAtualizacao !== 'Nunca' ? 
+                    new Date(stats.ultimaAtualizacao).toLocaleString('pt-BR') : 'Nunca';
+                
+                container.innerHTML = `
+                    <p><strong>Solicitações:</strong> ${stats.totalSolicitacoes}</p>
+                    <p><strong>Cotações:</strong> ${stats.totalCotacoes}</p>
+                    <p><strong>Fornecedores:</strong> ${stats.fornecedoresUnicos}</p>
+                    <p><strong>Última atualização:</strong> ${ultimaAtualizacao}</p>
+                `;
+            }
+        }
+
+        // Notificações
+        function mostrarNotificacao(mensagem, tipo) {
+            const cores = {
+                success: 'bg-green-500',
+                error: 'bg-red-500',
+                info: 'bg-blue-500'
+            };
+            
+            const notificacao = document.createElement('div');
+            notificacao.className = `fixed top-4 right-4 ${cores[tipo]} text-white px-6 py-3 rounded-lg shadow-lg z-50 fade-in`;
+            notificacao.textContent = mensagem;
+            
+            document.body.appendChild(notificacao);
+            
+            setTimeout(() => {
+                notificacao.remove();
+            }, 3000);
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarDadosSalvos();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99097e60419c009f',t:'MTc2MDgwNTc5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
