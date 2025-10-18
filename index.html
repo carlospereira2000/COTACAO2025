@@ -725,55 +725,100 @@
         function atualizarCotacoesRecebidas() {
             const container = document.getElementById('cotacoes-recebidas-lista');
             
-            if (cotacoes.length === 0) {
-                container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhuma cotação recebida ainda</div>';
+            // Combinar cotações individuais e semanais
+            let todasCotacoes = [...cotacoes]; // Cotações individuais
+            
+            // Adicionar cotações da semana atual se existir
+            if (cotacaoAtual && cotacaoAtual.cotacoes) {
+                todasCotacoes = [...todasCotacoes, ...cotacaoAtual.cotacoes];
+            }
+            
+            // Adicionar cotações do histórico semanal
+            cotacoesSemanais.forEach(cotacaoSemanal => {
+                if (cotacaoSemanal.cotacoes) {
+                    todasCotacoes = [...todasCotacoes, ...cotacaoSemanal.cotacoes.map(c => ({
+                        ...c,
+                        semana: cotacaoSemanal.semana,
+                        tipoSemanal: true
+                    }))];
+                }
+            });
+            
+            if (todasCotacoes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">📭</div>
+                        <h3 class="text-xl font-bold text-gray-600 mb-2">Nenhuma cotação recebida ainda</h3>
+                        <p class="text-gray-500">As cotações dos fornecedores aparecerão aqui</p>
+                    </div>
+                `;
                 return;
             }
             
-            // Agrupar cotações por solicitação
-            const cotacoesPorSolicitacao = {};
-            cotacoes.forEach(cotacao => {
-                if (!cotacoesPorSolicitacao[cotacao.solicitacaoId]) {
-                    cotacoesPorSolicitacao[cotacao.solicitacaoId] = [];
-                }
-                cotacoesPorSolicitacao[cotacao.solicitacaoId].push(cotacao);
-            });
+            // Separar cotações por tipo
+            const cotacoesIndividuais = todasCotacoes.filter(c => !c.tipoSemanal && !c.tipo);
+            const cotacoesSemana = todasCotacoes.filter(c => c.tipo === 'semanal' || c.tipoSemanal);
             
-            let html = '<div class="space-y-6">';
+            let html = '<div class="space-y-8">';
             
-            Object.keys(cotacoesPorSolicitacao).forEach(solicitacaoId => {
-                const solicitacao = solicitacoes.find(s => s.id == solicitacaoId);
-                const cotacoesSolicitacao = cotacoesPorSolicitacao[solicitacaoId];
-                
+            // Seção de Cotações Semanais
+            if (cotacoesSemana.length > 0) {
                 html += `
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <h3 class="text-lg font-bold text-gray-800 mb-3">📦 ${solicitacao.nome}</h3>
-                        <div class="mb-4 text-sm text-gray-600">
-                            <p><strong>Descrição:</strong> ${solicitacao.descricao}</p>
-                            <p><strong>Quantidade:</strong> ${solicitacao.quantidade} unidades</p>
-                            <p><strong>Prioridade:</strong> <span class="font-medium ${solicitacao.prioridade === 'Alta' ? 'text-red-600' : solicitacao.prioridade === 'Média' ? 'text-orange-600' : 'text-gray-600'}">${solicitacao.prioridade}</span></p>
-                        </div>
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border-2 border-blue-200">
+                        <h3 class="text-2xl font-bold text-blue-800 mb-6 flex items-center gap-2">
+                            📅 Cotações Semanais
+                            <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">${cotacoesSemana.length}</span>
+                        </h3>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 `;
                 
-                // Ordenar cotações por preço total
-                cotacoesSolicitacao.sort((a, b) => (a.precoUnitario * solicitacao.quantidade) - (b.precoUnitario * solicitacao.quantidade));
+                // Agrupar por fornecedor
+                const cotacoesPorFornecedor = {};
+                cotacoesSemana.forEach(cotacao => {
+                    if (!cotacoesPorFornecedor[cotacao.fornecedorNome]) {
+                        cotacoesPorFornecedor[cotacao.fornecedorNome] = [];
+                    }
+                    cotacoesPorFornecedor[cotacao.fornecedorNome].push(cotacao);
+                });
                 
-                cotacoesSolicitacao.forEach((cotacao, index) => {
-                    const precoTotal = cotacao.precoUnitario * solicitacao.quantidade;
-                    const ehMelhor = index === 0;
+                Object.keys(cotacoesPorFornecedor).forEach(fornecedorNome => {
+                    const cotacoesFornecedor = cotacoesPorFornecedor[fornecedorNome];
+                    const valorTotal = cotacoesFornecedor.reduce((acc, c) => {
+                        const produto = cotacaoAtual ? cotacaoAtual.produtos.find(p => p.id === c.produtoId) : null;
+                        return acc + (produto ? c.precoUnitario * produto.quantidade : 0);
+                    }, 0);
+                    
                     html += `
-                        <div class="bg-white rounded-lg p-4 border ${ehMelhor ? 'border-green-300 bg-green-50' : 'border-gray-200'}">
-                            <div class="flex justify-between items-center mb-2">
-                                <h4 class="font-bold text-gray-800">${cotacao.fornecedorNome}</h4>
-                                ${ehMelhor ? '<span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">MELHOR</span>' : ''}
+                        <div class="bg-white rounded-lg p-4 border border-blue-200 shadow-sm">
+                            <h4 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                🏢 ${fornecedorNome}
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">${cotacoesFornecedor.length} itens</span>
+                            </h4>
+                            
+                            <div class="space-y-2 mb-3">
+                                ${cotacoesFornecedor.map(cotacao => {
+                                    const produto = cotacaoAtual ? cotacaoAtual.produtos.find(p => p.id === cotacao.produtoId) : null;
+                                    const precoTotal = produto ? cotacao.precoUnitario * produto.quantidade : 0;
+                                    
+                                    return `
+                                        <div class="bg-gray-50 rounded p-2 text-sm">
+                                            <p class="font-medium text-gray-800">${cotacao.produtoNome}</p>
+                                            <div class="flex justify-between text-gray-600">
+                                                <span>R$ ${cotacao.precoUnitario.toFixed(2)}/un</span>
+                                                <span class="font-bold">R$ ${precoTotal.toFixed(2)}</span>
+                                            </div>
+                                            <p class="text-xs text-gray-500">${cotacao.prazoEntrega} dias</p>
+                                        </div>
+                                    `;
+                                }).join('')}
                             </div>
-                            <div class="space-y-1 text-sm">
-                                <p><span class="font-medium">Preço unitário:</span> R$ ${cotacao.precoUnitario.toFixed(2)}</p>
-                                <p><span class="font-medium">Preço total:</span> <span class="font-bold ${ehMelhor ? 'text-green-600' : 'text-gray-800'}">R$ ${precoTotal.toFixed(2)}</span></p>
-                                <p><span class="font-medium">Prazo:</span> ${cotacao.prazoEntrega} dias</p>
-                                <p><span class="font-medium">Recebida em:</span> ${cotacao.data}</p>
+                            
+                            <div class="border-t pt-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-bold text-gray-700">Total:</span>
+                                    <span class="font-bold text-blue-600 text-lg">R$ ${valorTotal.toFixed(2)}</span>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -783,7 +828,92 @@
                         </div>
                     </div>
                 `;
-            });
+            }
+            
+            // Seção de Cotações Individuais
+            if (cotacoesIndividuais.length > 0) {
+                html += `
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200">
+                        <h3 class="text-2xl font-bold text-green-800 mb-6 flex items-center gap-2">
+                            📦 Cotações Individuais
+                            <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">${cotacoesIndividuais.length}</span>
+                        </h3>
+                `;
+                
+                // Agrupar cotações individuais por solicitação
+                const cotacoesPorSolicitacao = {};
+                cotacoesIndividuais.forEach(cotacao => {
+                    if (!cotacoesPorSolicitacao[cotacao.solicitacaoId]) {
+                        cotacoesPorSolicitacao[cotacao.solicitacaoId] = [];
+                    }
+                    cotacoesPorSolicitacao[cotacao.solicitacaoId].push(cotacao);
+                });
+                
+                html += '<div class="space-y-6">';
+                
+                Object.keys(cotacoesPorSolicitacao).forEach(solicitacaoId => {
+                    const solicitacao = solicitacoes.find(s => s.id == solicitacaoId);
+                    if (!solicitacao) return;
+                    
+                    const cotacoesSolicitacao = cotacoesPorSolicitacao[solicitacaoId];
+                    
+                    html += `
+                        <div class="bg-white rounded-lg p-4 border border-green-200">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h4 class="text-lg font-bold text-gray-800">${solicitacao.nome}</h4>
+                                    <p class="text-sm text-gray-600">${solicitacao.descricao}</p>
+                                    <p class="text-sm text-gray-600">Quantidade: ${solicitacao.quantidade} unidades</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full text-xs font-medium ${solicitacao.prioridade === 'Alta' ? 'bg-red-100 text-red-800' : solicitacao.prioridade === 'Média' ? 'bg-orange-100 text-orange-800' : 'bg-gray-100 text-gray-800'}">
+                                    ${solicitacao.prioridade}
+                                </span>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    `;
+                    
+                    // Ordenar cotações por preço total
+                    cotacoesSolicitacao.sort((a, b) => (a.precoUnitario * solicitacao.quantidade) - (b.precoUnitario * solicitacao.quantidade));
+                    
+                    cotacoesSolicitacao.forEach((cotacao, index) => {
+                        const precoTotal = cotacao.precoUnitario * solicitacao.quantidade;
+                        const ehMelhor = index === 0;
+                        html += `
+                            <div class="bg-gray-50 rounded-lg p-3 border ${ehMelhor ? 'border-green-300 bg-green-50' : 'border-gray-200'}">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h5 class="font-bold text-gray-800">${cotacao.fornecedorNome}</h5>
+                                    ${ehMelhor ? '<span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs">MELHOR</span>' : ''}
+                                </div>
+                                <div class="space-y-1 text-sm">
+                                    <p><span class="font-medium">Unitário:</span> R$ ${cotacao.precoUnitario.toFixed(2)}</p>
+                                    <p><span class="font-medium">Total:</span> <span class="font-bold ${ehMelhor ? 'text-green-600' : 'text-gray-800'}">R$ ${precoTotal.toFixed(2)}</span></p>
+                                    <p><span class="font-medium">Prazo:</span> ${cotacao.prazoEntrega} dias</p>
+                                    <p class="text-xs text-gray-500">Em: ${cotacao.data}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            }
+            
+            // Mensagem se não houver cotações
+            if (cotacoesSemana.length === 0 && cotacoesIndividuais.length === 0) {
+                html += `
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">📭</div>
+                        <h3 class="text-xl font-bold text-gray-600 mb-2">Nenhuma cotação recebida ainda</h3>
+                        <p class="text-gray-500">As cotações dos fornecedores aparecerão aqui</p>
+                    </div>
+                `;
+            }
             
             html += '</div>';
             container.innerHTML = html;
@@ -1974,5 +2104,5 @@
             carregarDadosSalvos();
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9909c5f4d435009f',t:'MTc2MDgwODcyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9909e47ff300009f',t:'MTc2MDgwOTk3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
