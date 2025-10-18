@@ -1240,10 +1240,34 @@
         function gerarAnaliseComprador() {
             const container = document.getElementById('resultado-analise-comprador');
             
-            if (solicitacoes.length === 0 || cotacoes.length === 0) {
+            // Combinar todas as cotações (individuais + semanais)
+            let todasCotacoes = [...cotacoes]; // Cotações individuais
+            
+            // Adicionar cotações da semana atual se existir
+            if (cotacaoAtual && cotacaoAtual.cotacoes) {
+                todasCotacoes = [...todasCotacoes, ...cotacaoAtual.cotacoes];
+            }
+            
+            // Adicionar cotações do histórico semanal
+            cotacoesSemanais.forEach(cotacaoSemanal => {
+                if (cotacaoSemanal.cotacoes) {
+                    todasCotacoes = [...todasCotacoes, ...cotacaoSemanal.cotacoes];
+                }
+            });
+            
+            if (solicitacoes.length === 0 && (!cotacaoAtual || cotacaoAtual.produtos.length === 0)) {
                 container.innerHTML = `
                     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <p class="text-yellow-800">⚠️ Para gerar a análise, você precisa ter solicitações criadas e cotações recebidas.</p>
+                        <p class="text-yellow-800">⚠️ Para gerar a análise, você precisa ter produtos solicitados e cotações recebidas.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (todasCotacoes.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-blue-800">📊 Produtos cadastrados, mas ainda aguardando cotações dos fornecedores.</p>
                     </div>
                 `;
                 return;
@@ -1251,17 +1275,32 @@
             
             // Agrupar TODAS as cotações por fornecedor
             const todasCotacoesPorFornecedor = {};
-            cotacoes.forEach(cotacao => {
+            todasCotacoes.forEach(cotacao => {
                 if (!todasCotacoesPorFornecedor[cotacao.fornecedorNome]) {
                     todasCotacoesPorFornecedor[cotacao.fornecedorNome] = [];
                 }
-                const solicitacao = solicitacoes.find(s => s.id === cotacao.solicitacaoId);
-                if (solicitacao) {
-                    todasCotacoesPorFornecedor[cotacao.fornecedorNome].push({
-                        ...cotacao,
-                        solicitacao,
-                        precoTotal: cotacao.precoUnitario * solicitacao.quantidade
-                    });
+                
+                // Para cotações individuais
+                if (cotacao.solicitacaoId) {
+                    const solicitacao = solicitacoes.find(s => s.id === cotacao.solicitacaoId);
+                    if (solicitacao) {
+                        todasCotacoesPorFornecedor[cotacao.fornecedorNome].push({
+                            ...cotacao,
+                            solicitacao,
+                            precoTotal: cotacao.precoUnitario * solicitacao.quantidade
+                        });
+                    }
+                }
+                // Para cotações semanais
+                else if (cotacao.produtoId) {
+                    const produto = cotacaoAtual ? cotacaoAtual.produtos.find(p => p.id === cotacao.produtoId) : null;
+                    if (produto) {
+                        todasCotacoesPorFornecedor[cotacao.fornecedorNome].push({
+                            ...cotacao,
+                            solicitacao: { nome: produto.nome, quantidade: produto.quantidade },
+                            precoTotal: cotacao.precoUnitario * produto.quantidade
+                        });
+                    }
                 }
             });
 
@@ -2112,47 +2151,89 @@
                 return;
             }
             
+            // Verificar se já cotou todos os produtos
+            const jaCotouTodos = cotacaoAtual.produtos.every(produto => 
+                cotacaoAtual.cotacoes.some(c => c.produtoId === produto.id && c.fornecedorNome === fornecedorAtual.nome)
+            );
+            
             container.innerHTML = `
                 <div class="mb-4">
                     <p class="text-gray-600 mb-2"><strong>Período:</strong> ${new Date(cotacaoAtual.dataInicio).toLocaleDateString('pt-BR')} até ${new Date(cotacaoAtual.dataFim).toLocaleDateString('pt-BR')}</p>
                     <p class="text-gray-600"><strong>Semana:</strong> ${cotacaoAtual.semana}</p>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                    ${cotacaoAtual.produtos.map(produto => {
-                        const jaCotou = cotacaoAtual.cotacoes.some(c => c.produtoId === produto.id && c.fornecedorNome === fornecedorAtual.nome);
+                ${jaCotouTodos ? `
+                    <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
+                        <div class="text-center">
+                            <div class="text-4xl mb-3">✅</div>
+                            <h3 class="text-xl font-bold text-green-800 mb-2">Cotação Completa!</h3>
+                            <p class="text-green-700">Você já enviou cotações para todos os produtos desta semana.</p>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border-2 border-green-200 mb-6">
+                        <h3 class="text-xl font-bold text-green-800 mb-4">💰 Enviar Cotações em Lote</h3>
                         
-                        return `
-                            <div class="bg-gray-50 rounded-lg p-4 border ${jaCotou ? 'border-green-300 bg-green-50' : 'border-gray-200'}">
-                                <div class="flex justify-between items-start mb-3">
-                                    <h4 class="font-bold text-gray-800">${produto.nome}</h4>
-                                    ${jaCotou ? 
-                                        '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">✅ Cotado</span>' : 
-                                        '<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">⏳ Pendente</span>'
-                                    }
-                                </div>
-                                
-                                <div class="space-y-2 text-sm text-gray-600 mb-4">
-                                    <p><strong>Quantidade:</strong> ${produto.quantidade}</p>
-                                    ${produto.precoReferencia ? 
-                                        `<p><strong>Preço Referência:</strong> <span class="text-green-600 font-medium">R$ ${produto.precoReferencia.toFixed(2)}</span></p>` : 
-                                        '<p class="text-gray-400">Sem preço de referência</p>'
-                                    }
-                                </div>
-                                
-                                ${!jaCotou ? `
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                            ${cotacaoAtual.produtos.map(produto => `
+                                <div class="bg-white rounded-lg p-4 border border-green-200">
+                                    <h4 class="font-bold text-gray-800 mb-2">${produto.nome}</h4>
+                                    <div class="space-y-2 text-sm text-gray-600 mb-3">
+                                        <p><strong>Quantidade:</strong> ${produto.quantidade}</p>
+                                        ${produto.precoReferencia ? 
+                                            `<p><strong>Referência:</strong> <span class="text-green-600 font-medium">R$ ${produto.precoReferencia.toFixed(2)}</span></p>` : 
+                                            '<p class="text-gray-400">Sem referência</p>'
+                                        }
+                                    </div>
+                                    
                                     <div class="space-y-2">
                                         <input type="number" id="preco-semanal-${produto.id}" placeholder="Preço unitário" min="0" step="0.01" 
                                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent">
                                         <input type="number" id="prazo-semanal-${produto.id}" placeholder="Prazo (dias)" min="1" value="${fornecedorAtual.prazoEntrega}"
                                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent">
-                                        <button onclick="enviarCotacaoSemanal(${produto.id})" class="w-full bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors font-medium text-sm">
-                                            💰 Enviar Cotação
-                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <button onclick="preencherPrazoPadrao()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                ⚡ Preencher Prazo Padrão
+                            </button>
+                            <button onclick="enviarTodasCotacoesSemana()" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium text-lg">
+                                📤 Enviar Todas as Cotações
+                            </button>
+                        </div>
+                    </div>
+                `}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    ${cotacaoAtual.produtos.map(produto => {
+                        const cotacaoEnviada = cotacaoAtual.cotacoes.find(c => c.produtoId === produto.id && c.fornecedorNome === fornecedorAtual.nome);
+                        
+                        return `
+                            <div class="bg-gray-50 rounded-lg p-4 border ${cotacaoEnviada ? 'border-green-300 bg-green-50' : 'border-gray-200'}">
+                                <div class="flex justify-between items-start mb-3">
+                                    <h4 class="font-bold text-gray-800">${produto.nome}</h4>
+                                    ${cotacaoEnviada ? 
+                                        '<span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">✅ Enviado</span>' : 
+                                        '<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">⏳ Pendente</span>'
+                                    }
+                                </div>
+                                
+                                ${cotacaoEnviada ? `
+                                    <div class="space-y-1 text-sm">
+                                        <p><strong>Preço:</strong> R$ ${cotacaoEnviada.precoUnitario.toFixed(2)}</p>
+                                        <p><strong>Prazo:</strong> ${cotacaoEnviada.prazoEntrega} dias</p>
+                                        <p><strong>Total:</strong> <span class="font-bold text-green-600">R$ ${(cotacaoEnviada.precoUnitario * produto.quantidade).toFixed(2)}</span></p>
                                     </div>
                                 ` : `
-                                    <div class="bg-green-100 border border-green-200 rounded p-3">
-                                        <p class="text-green-800 text-sm">✅ Cotação enviada com sucesso!</p>
+                                    <div class="space-y-1 text-sm text-gray-600">
+                                        <p><strong>Quantidade:</strong> ${produto.quantidade}</p>
+                                        ${produto.precoReferencia ? 
+                                            `<p><strong>Referência:</strong> R$ ${produto.precoReferencia.toFixed(2)}</p>` : 
+                                            '<p class="text-gray-400">Sem referência</p>'
+                                        }
                                     </div>
                                 `}
                             </div>
@@ -2170,6 +2251,72 @@
                     </ul>
                 </div>
             `;
+        }
+        
+        function preencherPrazoPadrao() {
+            if (!cotacaoAtual) return;
+            
+            cotacaoAtual.produtos.forEach(produto => {
+                const prazoInput = document.getElementById(`prazo-semanal-${produto.id}`);
+                if (prazoInput) {
+                    prazoInput.value = fornecedorAtual.prazoEntrega;
+                }
+            });
+            
+            mostrarNotificacao('Prazo padrão preenchido em todos os produtos!', 'info');
+        }
+        
+        function enviarTodasCotacoesSemana() {
+            if (!cotacaoAtual) return;
+            
+            let cotacoesEnviadas = 0;
+            let erros = 0;
+            const errosProdutos = [];
+            
+            cotacaoAtual.produtos.forEach(produto => {
+                // Verificar se já foi cotado
+                const jaCotou = cotacaoAtual.cotacoes.some(c => c.produtoId === produto.id && c.fornecedorNome === fornecedorAtual.nome);
+                if (jaCotou) return;
+                
+                const precoInput = document.getElementById(`preco-semanal-${produto.id}`);
+                const prazoInput = document.getElementById(`prazo-semanal-${produto.id}`);
+                
+                if (!precoInput.value || !prazoInput.value) {
+                    erros++;
+                    errosProdutos.push(produto.nome);
+                    return;
+                }
+                
+                const cotacao = {
+                    id: Date.now() + Math.random() + produto.id,
+                    produtoId: produto.id,
+                    produtoNome: produto.nome,
+                    fornecedorNome: fornecedorAtual.nome,
+                    precoUnitario: parseFloat(precoInput.value),
+                    prazoEntrega: parseInt(prazoInput.value),
+                    data: new Date().toLocaleDateString('pt-BR'),
+                    tipo: 'semanal'
+                };
+                
+                cotacaoAtual.cotacoes.push(cotacao);
+                cotacoesEnviadas++;
+            });
+            
+            if (cotacoesEnviadas > 0) {
+                BancoDados.salvar('cotacaoAtual', cotacaoAtual);
+                atualizarCotacaoSemanalFornecedor();
+                atualizarInterfaceCotacaoSemanal();
+                
+                mostrarNotificacao(`🎉 ${cotacoesEnviadas} cotação(ões) enviada(s) com sucesso!`, 'success');
+            }
+            
+            if (erros > 0) {
+                mostrarNotificacao(`⚠️ ${erros} produto(s) não foram cotados: ${errosProdutos.join(', ')}. Preencha preço e prazo!`, 'error');
+            }
+            
+            if (cotacoesEnviadas === 0 && erros === 0) {
+                mostrarNotificacao('Todas as cotações já foram enviadas!', 'info');
+            }
         }
         
         function enviarCotacaoSemanal(produtoId) {
@@ -2781,5 +2928,5 @@
             }, 2000);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990a828154ea009f',t:'MTc2MDgxNjQ1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'990a8cc8c07e009f',t:'MTc2MDgxNjg3Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
